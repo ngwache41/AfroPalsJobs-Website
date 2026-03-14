@@ -439,13 +439,19 @@ export default function Home() {
               Create Free Account
             </Button>
 
-            <Button
-              size="lg"
-              variant="outline"
-              className="bg-transparent text-white border-white hover:bg-white/10"
-            >
-              Contact Our Team
-            </Button>
+            <a
+  href="https://wa.me/+79332742692"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <Button
+    size="lg"
+    variant="outline"
+    className="bg-transparent text-white border-white hover:bg-white/10"
+  >
+    Chat on WhatsApp
+  </Button>
+</a>
 
           </div>
 
