@@ -23,13 +23,17 @@ export default function Footer() {
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
                 <span>info@afropalsjobs.ru</span>
-                <span>Tell/ Whatsapp:+7(933) 274-26-92 </span>
               </div>
+              <div className="flex items-center gap-2">
+                <Mobile className="h-4 w-4" />
+                <span>Tell/ Whatsapp:+7(933) 274-26-92</span>
+                </div>
               <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
                 <span>www.afropalsjobs.ru</span>
               </div>
             </div>
+          </div>
           </div>
 
           <div>
