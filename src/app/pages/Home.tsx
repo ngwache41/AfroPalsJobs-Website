@@ -275,7 +275,7 @@ export default function Home() {
 
 
               <p className="text-gray-400 text-sm mt-6">
-                Registered Individual Entrepreneur — ОГРНИП: 325774600487744
+                Registered Entrepreneur — OGRNIP: 325774600487744 / INN: 774351876800
               </p>
 
 
