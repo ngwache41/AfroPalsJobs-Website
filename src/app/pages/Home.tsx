@@ -291,7 +291,7 @@ export default function Home() {
         </div>
 
       </section>
-      
+
 
 
       {/* SERVICES SECTION */}
@@ -370,6 +370,51 @@ export default function Home() {
       </Card>
 
     </div>
+  </div>
+</section>
+
+
+
+{/* TRUST & VERIFICATION */}
+<section className="py-16 bg-gray-50">
+  <div className="container mx-auto px-4">
+
+    <div className="text-center mb-12">
+      <h2 className="text-3xl md:text-4xl mb-4">Trust & Transparency</h2>
+      <p className="text-gray-600 max-w-3xl mx-auto">
+        AfroPals Jobs is committed to creating a safe and transparent
+        recruitment environment for both job seekers and employers.
+      </p>
+    </div>
+
+    <div className="grid md:grid-cols-3 gap-8">
+
+      <div className="text-center">
+        <h3 className="text-xl mb-2">Verified Employers</h3>
+        <p className="text-gray-600">
+          We work with verified companies and legitimate employers
+          to ensure job seekers apply only to genuine opportunities.
+        </p>
+      </div>
+
+      <div className="text-center">
+        <h3 className="text-xl mb-2">No Hidden Agents</h3>
+        <p className="text-gray-600">
+          Our platform promotes direct communication between
+          employers and applicants without unnecessary intermediaries.
+        </p>
+      </div>
+
+      <div className="text-center">
+        <h3 className="text-xl mb-2">Transparent Recruitment</h3>
+        <p className="text-gray-600">
+          AfroPals Jobs promotes honest recruitment practices
+          and clear hiring processes for international job seekers.
+        </p>
+      </div>
+
+    </div>
+
   </div>
 </section>
 
