@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, MapPin, Briefcase, Filter } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import {
@@ -46,9 +46,9 @@ export default function Jobs() {
       {/* Search Header */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl md:text-4xl mb-6">Find Your Perfect Job</h1>
+          <h1 className="text-3xl md:text-4xl mb-6">Explore Verified Job Opportunities</h1>
           <p className="text-gray-600 mb-8">
-            Browse {jobs.length} open positions from top companies
+            Browse {jobs.length} available positions from verified employers and discover opportunities that match your skills and goals.
           </p>
 
           <div className="bg-white rounded-lg shadow-md p-4">
@@ -57,7 +57,7 @@ export default function Jobs() {
                 <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Job title, keywords, or company"
+                  placeholder="Search by job title, keyword, or employer"
                   className="pl-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -70,12 +70,12 @@ export default function Jobs() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Locations</SelectItem>
-                  <SelectItem value="San Francisco">San Francisco</SelectItem>
-                  <SelectItem value="New York">New York</SelectItem>
-                  <SelectItem value="Austin">Austin</SelectItem>
-                  <SelectItem value="Boston">Boston</SelectItem>
-                  <SelectItem value="Seattle">Seattle</SelectItem>
-                  <SelectItem value="Los Angeles">Los Angeles</SelectItem>
+                  <SelectItem value="Moscow">Moscow</SelectItem>
+                  <SelectItem value="Saint Petersburg">Saint Petersburg</SelectItem>
+                  <SelectItem value="Kazan">Kazan</SelectItem>
+                  <SelectItem value="Yekaterinburg">Yekaterinburg</SelectItem>
+                  <SelectItem value="Novosibirsk">Novosibirsk</SelectItem>
+                  <SelectItem value="Russia">Across Russia</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -101,8 +101,9 @@ export default function Jobs() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-6">
             <p className="text-gray-600">
-              Showing <span className="font-semibold">{filteredJobs.length}</span> jobs
+              Showing <span className="font-semibold">{filteredJobs.length}</span> job opportunities
             </p>
+
             <Button variant="outline" size="sm">
               <Filter className="h-4 w-4 mr-2" />
               More Filters
@@ -118,10 +119,10 @@ export default function Jobs() {
           ) : (
             <div className="text-center py-12">
               <p className="text-gray-600 text-lg">
-                No jobs found matching your criteria.
+                No jobs found matching your search.
               </p>
               <p className="text-gray-500 mt-2">
-                Try adjusting your filters or search terms.
+                Try changing your keywords, location, or job type.
               </p>
             </div>
           )}
