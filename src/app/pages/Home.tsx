@@ -374,7 +374,6 @@ export default function Home() {
 </section>
 
 
-
 {/* TRUST & VERIFICATION */}
 <section className="py-16 bg-gray-50">
   <div className="container mx-auto px-4">
