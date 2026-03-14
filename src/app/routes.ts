@@ -1,4 +1,5 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter } from "react-router-dom";
+
 import Home from "./pages/Home";
 import Jobs from "./pages/Jobs";
 import JobDetails from "./pages/JobDetails";
@@ -10,30 +11,30 @@ import CandidateConsent from "./pages/CandidateConsent";
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: Home,
+    element: <Home />,
   },
   {
     path: "/jobs",
-    Component: Jobs,
+    element: <Jobs />,
   },
   {
     path: "/jobs/:id",
-    Component: JobDetails,
+    element: <JobDetails />,
   },
   {
     path: "/terms",
-    Component: Terms,
+    element: <Terms />,
   },
   {
     path: "/privacy",
-    Component: Privacy,
+    element: <Privacy />,
   },
   {
     path: "/employer-agreement",
-    Component: EmployerAgreement,
+    element: <EmployerAgreement />,
   },
   {
     path: "/candidate-consent",
-    Component: CandidateConsent,
+    element: <CandidateConsent />,
   },
 ]);
