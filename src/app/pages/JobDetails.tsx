@@ -27,9 +27,12 @@ export default function JobDetails() {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center">
-            <h2 className="text-2xl mb-4">Job not found</h2>
+            <h2 className="text-2xl mb-4">Job opportunity not found</h2>
+            <p className="text-gray-600 mb-6">
+              The job you are looking for may have been removed or is no longer available.
+            </p>
             <Button onClick={() => navigate("/jobs")}>Back to Jobs</Button>
           </div>
         </div>
@@ -171,41 +174,41 @@ export default function JobDetails() {
             <div className="space-y-6">
               <Card>
                 <CardContent className="pt-6">
-                  <h3 className="font-semibold mb-4">About {job.company}</h3>
+                  <h3 className="font-semibold mb-4">About This Opportunity</h3>
                   <ImageWithFallback
                     src="https://images.unsplash.com/photo-1758873268631-fa944fc5cad2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaXZlcnNlJTIwY29ycG9yYXRlJTIwcHJvZmVzc2lvbmFsc3xlbnwxfHx8fDE3NzMyNjU5ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                    alt="Company culture"
+                    alt="Workplace environment"
                     className="rounded-lg w-full h-40 object-cover mb-4"
                   />
                   <p className="text-sm text-gray-600 mb-4">
-                    A leading technology company focused on innovation and creating amazing products that make a difference in people's lives.
+                    This opportunity is listed through AfroPals Jobs to help qualified candidates connect with verified employers and genuine work opportunities in Russia.
                   </p>
                   <Separator className="my-4" />
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Industry</span>
-                      <span>Technology</span>
+                      <span className="text-gray-600">Platform</span>
+                      <span>AfroPals Jobs</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Company Size</span>
-                      <span>500-1000</span>
+                      <span className="text-gray-600">Location</span>
+                      <span>{job.location}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Founded</span>
-                      <span>2015</span>
+                      <span className="text-gray-600">Job Type</span>
+                      <span>{job.type}</span>
                     </div>
                   </div>
                   <Button variant="outline" className="w-full mt-4">
-                    View Company Profile
+                    View More Jobs
                   </Button>
                 </CardContent>
               </Card>
 
               <Card className="bg-blue-50 border-blue-200">
                 <CardContent className="pt-6">
-                  <h3 className="font-semibold mb-2">Quick Apply</h3>
+                  <h3 className="font-semibold mb-2">Application Support</h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Ready to take the next step? Apply now and we'll review your application within 48 hours.
+                    Ready to apply? AfroPals Jobs helps candidates access verified opportunities and move forward with clarity and confidence.
                   </p>
                   <Button className="w-full" size="lg">
                     Apply for this Position
@@ -218,10 +221,10 @@ export default function JobDetails() {
                   <h3 className="font-semibold mb-4">Share this Job</h3>
                   <div className="space-y-2">
                     <Button variant="outline" className="w-full justify-start">
-                      Share on LinkedIn
+                      Share on WhatsApp
                     </Button>
                     <Button variant="outline" className="w-full justify-start">
-                      Share on Twitter
+                      Share with a Friend
                     </Button>
                     <Button variant="outline" className="w-full justify-start">
                       Copy Link
