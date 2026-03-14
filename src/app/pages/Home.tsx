@@ -291,6 +291,87 @@ export default function Home() {
         </div>
 
       </section>
+      
+
+
+      {/* SERVICES SECTION */}
+<section id="services" className="py-16 bg-white">
+  <div className="container mx-auto px-4">
+
+    <div className="text-center mb-12">
+      <h2 className="text-3xl md:text-4xl mb-4">Our Services</h2>
+      <p className="text-gray-600 max-w-3xl mx-auto">
+        AfroPals Jobs provides professional support for job seekers,
+        employers, and international applicants seeking reliable
+        recruitment, invitation support, and visa guidance.
+      </p>
+    </div>
+
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-xl mb-3">Job Recruitment</h3>
+          <p className="text-gray-600">
+            We connect candidates with verified employers and help job seekers
+            find genuine employment opportunities across different sectors in Russia.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-xl mb-3">Employer Hiring Support</h3>
+          <p className="text-gray-600">
+            We assist employers in finding qualified workers and simplifying
+            the recruitment process through trusted candidate sourcing.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-xl mb-3">Invitation Support</h3>
+          <p className="text-gray-600">
+            We provide support for different types of invitations including
+            tourist, private, business, and student invitations depending on the purpose of travel.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-xl mb-3">Visa Assistance</h3>
+          <p className="text-gray-600">
+            Where required, we help applicants understand the visa process,
+            prepare necessary documentation, and proceed with better clarity and confidence.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-xl mb-3">International Applicant Guidance</h3>
+          <p className="text-gray-600">
+            We support applicants from Africa, Asia, Europe, Australia,
+            New Zealand, and other parts of the world seeking opportunities in Russia.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-xl mb-3">Transparent Process</h3>
+          <p className="text-gray-600">
+            Our goal is to promote direct, reliable, and transparent recruitment
+            by reducing fake intermediaries and improving trust in the hiring process.
+          </p>
+        </CardContent>
+      </Card>
+
+    </div>
+  </div>
+</section>
 
 
 
