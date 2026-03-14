@@ -1,126 +1,53 @@
-import { Briefcase, Linkedin, Twitter, Facebook, Mail } from "lucide-react";
-import { Link } from "react-router";
+import { Mail, Globe, ShieldCheck } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+    <footer className="bg-gray-950 text-white py-12 mt-auto">
+      <div className="container mx-auto px-4">
+        <div className="grid md:grid-cols-3 gap-8">
+
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Briefcase className="h-6 w-6 text-blue-500" />
-              <span className="font-semibold text-xl text-white">TalentHub</span>
-            </div>
-            <p className="text-sm text-gray-400">
-              Connecting talented professionals with their dream careers since 2020.
+            <h3 className="text-2xl mb-4">AfroPals Jobs</h3>
+            <p className="text-gray-400 mb-4">
+              A global recruitment and support platform connecting job seekers
+              with verified employers and legitimate opportunities in Russia.
             </p>
-            <div className="flex gap-4 mt-4">
-              <a href="#" className="hover:text-blue-500 transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a href="#" className="hover:text-blue-500 transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="hover:text-blue-500 transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="hover:text-blue-500 transition-colors">
-                <Mail className="h-5 w-5" />
-              </a>
+            <p className="text-gray-500 text-sm">
+              ОГРНИП: 325774600487744
+            </p>
+          </div>
+
+          <div>
+            <h4 className="text-lg mb-4">Contact</h4>
+            <div className="space-y-3 text-gray-400">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                <span>info@afropalsjobs.ru</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                <span>www.afropalsjobs.ru</span>
+              </div>
             </div>
           </div>
 
           <div>
-            <h3 className="font-semibold text-white mb-4">For Job Seekers</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link to="/jobs" className="hover:text-blue-500 transition-colors">
-                  Browse Jobs
-                </Link>
-              </li>
-              <li>
-                <a href="#" className="hover:text-blue-500 transition-colors">
-                  Career Resources
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-blue-500 transition-colors">
-                  Resume Tips
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-blue-500 transition-colors">
-                  Interview Prep
-                </a>
-              </li>
-            </ul>
+            <h4 className="text-lg mb-4">Trust & Legal</h4>
+            <div className="space-y-3 text-gray-400">
+              <div className="flex items-start gap-2">
+                <ShieldCheck className="h-4 w-4 mt-1" />
+                <span>
+                  We support transparent recruitment, verified opportunities,
+                  and guidance for invitations and visa-related documentation.
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-white mb-4">For Employers</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a href="#" className="hover:text-blue-500 transition-colors">
-                  Post a Job
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-blue-500 transition-colors">
-                  Browse Candidates
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-blue-500 transition-colors">
-                  Pricing
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-blue-500 transition-colors">
-                  Recruiter Tools
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-white mb-4">Company</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a href="#about" className="hover:text-blue-500 transition-colors">
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a href="#contact" className="hover:text-blue-500 transition-colors">
-                  Contact
-                </a>
-              </li>
-              <li>
-                <Link to="/privacy" className="hover:text-blue-500 transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="hover:text-blue-500 transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link to="/employer-agreement" className="hover:text-blue-500 transition-colors">
-                  Employer Agreement
-                </Link>
-              </li>
-              <li>
-                <Link to="/candidate-consent" className="hover:text-blue-500 transition-colors">
-                  Candidate Consent
-                </Link>
-              </li>
-            </ul>
-          </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-8 text-sm text-center text-gray-400">
-          <p>&copy; 2026 TalentHub. All rights reserved.</p>
+        <div className="border-t border-gray-800 mt-10 pt-6 text-center text-gray-500 text-sm">
+          © 2026 AfroPals Jobs. All rights reserved.
         </div>
       </div>
     </footer>
