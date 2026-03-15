@@ -3,7 +3,6 @@ import { Button } from "./ui/button";
 import { Link, useNavigate } from "react-router";
 
 export default function Header() {
-
   const navigate = useNavigate();
 
   return (
