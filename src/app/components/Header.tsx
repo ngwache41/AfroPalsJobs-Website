@@ -1,6 +1,6 @@
 import { Menu } from "lucide-react";
 import { Button } from "./ui/button";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -8,13 +8,17 @@ export default function Header() {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+
+        {/* Logo */}
         <div className="flex items-center gap-2">
           <Link to="/" className="text-2xl font-semibold text-blue-700">
             AfroPals Jobs
           </Link>
         </div>
 
+        {/* Navigation */}
         <nav className="hidden md:flex items-center gap-6 text-sm text-gray-700">
+
           <Link to="/" className="hover:text-blue-600 transition-colors">
             Home
           </Link>
@@ -23,32 +27,43 @@ export default function Header() {
             Jobs
           </Link>
 
-          <a href="#services" className="hover:text-blue-600 transition-colors">
-            Services
-          </a>
-
           <Link to="/about" className="hover:text-blue-600 transition-colors">
             About
           </Link>
 
+          <a href="#services" className="hover:text-blue-600 transition-colors">
+            Services
+          </a>
+
           <a href="#contact" className="hover:text-blue-600 transition-colors">
             Contact
           </a>
+
         </nav>
 
+        {/* Buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="outline" onClick={() => navigate("/sign-in")}>
+
+          <Button
+            variant="outline"
+            onClick={() => navigate("/sign-in")}
+          >
             Sign In
           </Button>
 
-          <Button onClick={() => navigate("/post-job")}>
+          <Button
+            onClick={() => navigate("/post-job")}
+          >
             Post a Job
           </Button>
+
         </div>
 
+        {/* Mobile menu button */}
         <button className="md:hidden text-gray-700">
           <Menu className="h-6 w-6" />
         </button>
+
       </div>
     </header>
   );
