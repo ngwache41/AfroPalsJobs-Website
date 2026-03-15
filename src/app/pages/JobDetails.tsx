@@ -99,9 +99,18 @@ export default function JobDetails() {
               </div>
 
               <div className="flex md:flex-col gap-3">
-                <Button size="lg" className="flex-1">
-                  Apply Now
-                </Button>
+                <a
+  href={`https://wa.me/79332742692?text=${encodeURIComponent(
+    `Hello AfroPals Jobs, I am interested in applying for the position: ${job.title} at ${job.company}.`
+  )}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex-1"
+>
+  <Button size="lg" className="w-full">
+    Apply Now
+  </Button>
+</a>
                 <Button variant="outline" size="lg">
                   <Bookmark className="h-5 w-5" />
                 </Button>
