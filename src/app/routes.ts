@@ -2,11 +2,10 @@ import { createBrowserRouter } from "react-router";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
+import SignIn from "./pages/SignIn";
 import Jobs from "./pages/Jobs";
 import JobDetails from "./pages/JobDetails";
 import PostJob from "./pages/PostJob";
-import SignIn from "./pages/SignIn";
-
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import EmployerAgreement from "./pages/EmployerAgreement";
@@ -22,6 +21,10 @@ export const router = createBrowserRouter([
     Component: About,
   },
   {
+    path: "/sign-in",
+    Component: SignIn,
+  },
+  {
     path: "/jobs",
     Component: Jobs,
   },
@@ -32,10 +35,6 @@ export const router = createBrowserRouter([
   {
     path: "/post-job",
     Component: PostJob,
-  },
-  {
-    path: "/sign-in",
-    Component: SignIn,
   },
   {
     path: "/terms",
