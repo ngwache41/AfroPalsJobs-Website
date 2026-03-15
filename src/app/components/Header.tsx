@@ -1,31 +1,64 @@
 import { Menu } from "lucide-react";
 import { Button } from "./ui/button";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 export default function Header() {
+
+  const navigate = useNavigate();
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
 
+        {/* Logo */}
         <div className="flex items-center gap-2">
           <Link to="/" className="text-2xl font-semibold text-blue-700">
             AfroPals Jobs
           </Link>
         </div>
 
+        {/* Navigation */}
         <nav className="hidden md:flex items-center gap-6 text-sm text-gray-700">
-          <a href="/" className="hover:text-blue-600 transition-colors">Home</a>
-          <a href="/jobs" className="hover:text-blue-600 transition-colors">Jobs</a>
-          <a href="#services" className="hover:text-blue-600 transition-colors">Services</a>
-          <a href="#about" className="hover:text-blue-600 transition-colors">About</a>
-          <a href="#contact" className="hover:text-blue-600 transition-colors">Contact</a>
+          <Link to="/" className="hover:text-blue-600 transition-colors">
+            Home
+          </Link>
+
+          <Link to="/jobs" className="hover:text-blue-600 transition-colors">
+            Jobs
+          </Link>
+
+          <a href="#services" className="hover:text-blue-600 transition-colors">
+            Services
+          </a>
+
+          <a href="#about" className="hover:text-blue-600 transition-colors">
+            About
+          </a>
+
+          <a href="#contact" className="hover:text-blue-600 transition-colors">
+            Contact
+          </a>
         </nav>
 
+        {/* Right Side Buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="outline">Sign In</Button>
-          <Button>Post a Job</Button>
+
+          <Button
+            variant="outline"
+            onClick={() => navigate("/sign-in")}
+          >
+            Sign In
+          </Button>
+
+          <Button
+            onClick={() => navigate("/post-job")}
+          >
+            Post a Job
+          </Button>
+
         </div>
 
+        {/* Mobile Menu Button */}
         <button className="md:hidden text-gray-700">
           <Menu className="h-6 w-6" />
         </button>
