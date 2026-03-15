@@ -1,10 +1,11 @@
 import { Mail, Globe, ShieldCheck, Phone } from "lucide-react";
+import { Link } from "react-router";
 
 export default function Footer() {
   return (
     <footer className="bg-gray-950 text-white py-12 mt-auto">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-2xl mb-4">AfroPals Jobs</h3>
             <p className="text-gray-400 mb-4">
@@ -12,7 +13,7 @@ export default function Footer() {
               with verified employers and legitimate opportunities in Russia.
             </p>
             <p className="text-gray-500 text-sm">
-              OGRNIP: 325774600487744
+              ОГРНИП: 325774600487744
             </p>
           </div>
 
@@ -32,6 +33,32 @@ export default function Footer() {
               <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
                 <span>www.afropalsjobs.ru</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-lg mb-4">Legal</h4>
+            <div className="space-y-2 text-gray-400">
+              <div>
+                <Link to="/terms" className="hover:text-white transition-colors">
+                  Terms of Service
+                </Link>
+              </div>
+              <div>
+                <Link to="/privacy" className="hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+              </div>
+              <div>
+                <Link to="/employer-agreement" className="hover:text-white transition-colors">
+                  Employer Agreement
+                </Link>
+              </div>
+              <div>
+                <Link to="/candidate-consent" className="hover:text-white transition-colors">
+                  Candidate Consent
+                </Link>
               </div>
             </div>
           </div>
