@@ -31,9 +31,9 @@ export default function Header() {
             About
           </Link>
 
-          <a href="#contact" className="hover:text-blue-600 transition-colors">
+          <Link to="/contact" className="hover:text-blue-600 transition-colors">
             Contact
-          </a>
+          </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
