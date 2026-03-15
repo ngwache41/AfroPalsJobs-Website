@@ -23,13 +23,13 @@ export default function Header() {
             Jobs
           </Link>
 
+          <Link to="/services" className="hover:text-blue-600 transition-colors">
+            Services
+          </Link>
+
           <Link to="/about" className="hover:text-blue-600 transition-colors">
             About
           </Link>
-
-          <a href="#services" className="hover:text-blue-600 transition-colors">
-            Services
-          </a>
 
           <a href="#contact" className="hover:text-blue-600 transition-colors">
             Contact
