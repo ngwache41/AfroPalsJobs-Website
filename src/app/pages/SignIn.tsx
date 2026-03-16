@@ -4,6 +4,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Lock, Mail, UserCircle2, BriefcaseBusiness } from "lucide-react";
+import { Link } from "react-router";
 
 export default function SignIn() {
   return (
@@ -18,8 +19,8 @@ export default function SignIn() {
               Sign In to AfroPals Jobs
             </h1>
             <p className="text-lg text-gray-600">
-              Access your account to manage applications, communicate with employers,
-              or continue your recruitment journey through AfroPals Jobs.
+              Access your account to manage applications, review vacancies,
+              and continue your recruitment journey through AfroPals Jobs.
             </p>
           </div>
         </div>
@@ -29,6 +30,7 @@ export default function SignIn() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-8">
+
             {/* Candidate Sign In */}
             <Card className="shadow-sm border">
               <CardContent className="pt-8 px-8 pb-8">
@@ -38,8 +40,7 @@ export default function SignIn() {
                 </div>
 
                 <p className="text-gray-600 mb-6">
-                  Sign in to view job opportunities, continue applications,
-                  and stay connected with verified employers.
+                  Sign in to view applications, saved jobs, and candidate profile tools.
                 </p>
 
                 <div className="space-y-4">
@@ -61,9 +62,11 @@ export default function SignIn() {
                     />
                   </div>
 
-                  <Button className="w-full" size="lg">
-                    Sign In as Candidate
-                  </Button>
+                  <Link to="/candidate-dashboard">
+                    <Button className="w-full" size="lg">
+                      Sign In as Candidate
+                    </Button>
+                  </Link>
                 </div>
 
                 <div className="mt-6 text-sm text-gray-500">
@@ -81,8 +84,7 @@ export default function SignIn() {
                 </div>
 
                 <p className="text-gray-600 mb-6">
-                  Sign in to manage job postings, review applicants,
-                  and connect with international candidates.
+                  Sign in to manage job postings, review applications, and monitor hiring activity.
                 </p>
 
                 <div className="space-y-4">
@@ -104,9 +106,11 @@ export default function SignIn() {
                     />
                   </div>
 
-                  <Button className="w-full" size="lg">
-                    Sign In as Employer
-                  </Button>
+                  <Link to="/employer-dashboard">
+                    <Button className="w-full" size="lg">
+                      Sign In as Employer
+                    </Button>
+                  </Link>
                 </div>
 
                 <div className="mt-6 text-sm text-gray-500">
@@ -114,6 +118,7 @@ export default function SignIn() {
                 </div>
               </CardContent>
             </Card>
+
           </div>
         </div>
       </section>
@@ -123,7 +128,7 @@ export default function SignIn() {
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <h2 className="text-3xl mb-4">Need Help Accessing Your Account?</h2>
           <p className="text-gray-600 mb-8">
-            If you need support with sign in, account setup, or employer access,
+            If you need support with sign in, account setup, or dashboard access,
             AfroPals Jobs is available to assist you.
           </p>
 
