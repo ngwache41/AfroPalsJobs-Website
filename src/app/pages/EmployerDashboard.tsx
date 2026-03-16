@@ -2,13 +2,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import {
-  BriefcaseBusiness,
-  Users,
-  FileText,
-  TrendingUp,
-  PlusCircle,
-} from "lucide-react";
+import { BriefcaseBusiness, Users, FileText, TrendingUp, PlusCircle } from "lucide-react";
 import { Link } from "react-router";
 
 export default function EmployerDashboard() {
@@ -99,12 +93,8 @@ export default function EmployerDashboard() {
                         <p className="text-gray-600">Moscow, Russia</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
+                        <Button variant="outline" size="sm">View</Button>
+                        <Button variant="outline" size="sm">Edit</Button>
                       </div>
                     </div>
                   </div>
@@ -116,12 +106,8 @@ export default function EmployerDashboard() {
                         <p className="text-gray-600">Yekaterinburg, Russia</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
+                        <Button variant="outline" size="sm">View</Button>
+                        <Button variant="outline" size="sm">Edit</Button>
                       </div>
                     </div>
                   </div>
@@ -133,12 +119,8 @@ export default function EmployerDashboard() {
                         <p className="text-gray-600">Saint Petersburg, Russia</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
+                        <Button variant="outline" size="sm">View</Button>
+                        <Button variant="outline" size="sm">Edit</Button>
                       </div>
                     </div>
                   </div>
@@ -161,9 +143,11 @@ export default function EmployerDashboard() {
                     </Button>
                   </Link>
 
-                  <Button variant="outline" className="w-full">
-                    Manage Employers
-                  </Button>
+                  <Link to="/job-management" className="block">
+                    <Button variant="outline" className="w-full">
+                      Manage Jobs
+                    </Button>
+                  </Link>
 
                   <Button variant="outline" className="w-full">
                     Contact Support

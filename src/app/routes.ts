@@ -13,6 +13,7 @@ import EmployerDashboard from "./pages/EmployerDashboard";
 import CandidateDashboard from "./pages/CandidateDashboard";
 import CandidateProfile from "./pages/CandidateProfile";
 import Applications from "./pages/Applications";
+import JobManagement from "./pages/JobManagement";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import EmployerAgreement from "./pages/EmployerAgreement";
@@ -70,6 +71,10 @@ export const router = createBrowserRouter([
   {
     path: "/applications",
     Component: Applications,
+  },
+  {
+    path: "/job-management",
+    Component: JobManagement,
   },
   {
     path: "/terms",
