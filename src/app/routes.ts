@@ -8,6 +8,7 @@ import SignIn from "./pages/SignIn";
 import Jobs from "./pages/Jobs";
 import JobDetails from "./pages/JobDetails";
 import PostJob from "./pages/PostJob";
+import EmployerDashboard from "./pages/EmployerDashboard";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import EmployerAgreement from "./pages/EmployerAgreement";
@@ -45,6 +46,10 @@ export const router = createBrowserRouter([
   {
     path: "/post-job",
     Component: PostJob,
+  },
+  {
+    path: "/employer-dashboard",
+    Component: EmployerDashboard,
   },
   {
     path: "/terms",
