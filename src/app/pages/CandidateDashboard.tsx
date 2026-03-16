@@ -10,7 +10,6 @@ export default function CandidateDashboard() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
 
-      {/* HERO */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-5xl mb-4">Candidate Dashboard</h1>
@@ -21,7 +20,6 @@ export default function CandidateDashboard() {
         </div>
       </section>
 
-      {/* OVERVIEW CARDS */}
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -72,7 +70,6 @@ export default function CandidateDashboard() {
         </div>
       </section>
 
-      {/* MAIN AREA */}
       <section className="pb-12">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-3 gap-8">
@@ -132,10 +129,14 @@ export default function CandidateDashboard() {
                 </p>
 
                 <div className="space-y-3">
-                  <Button className="w-full">Update Profile</Button>
+                  <Link to="/candidate-profile">
+                    <Button className="w-full">Update Profile</Button>
+                  </Link>
+
                   <Button variant="outline" className="w-full">
                     Upload CV
                   </Button>
+
                   <Button variant="outline" className="w-full">
                     Saved Jobs
                   </Button>

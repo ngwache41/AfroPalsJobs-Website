@@ -11,6 +11,7 @@ import ApplyForm from "./pages/ApplyForm";
 import PostJob from "./pages/PostJob";
 import EmployerDashboard from "./pages/EmployerDashboard";
 import CandidateDashboard from "./pages/CandidateDashboard";
+import CandidateProfile from "./pages/CandidateProfile";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import EmployerAgreement from "./pages/EmployerAgreement";
@@ -60,6 +61,10 @@ export const router = createBrowserRouter([
   {
     path: "/candidate-dashboard",
     Component: CandidateDashboard,
+  },
+  {
+    path: "/candidate-profile",
+    Component: CandidateProfile,
   },
   {
     path: "/terms",
