@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, Link } from "react-router";
 import {
   MapPin,
   DollarSign,
@@ -99,21 +99,16 @@ export default function JobDetails() {
               </div>
 
               <div className="flex md:flex-col gap-3">
-                <a
-  href={`https://wa.me/79332742692?text=${encodeURIComponent(
-    `Hello AfroPals Jobs, I am interested in applying for the position: ${job.title} at ${job.company}.`
-  )}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="flex-1"
->
-  <Button size="lg" className="w-full">
-    Apply Now
-  </Button>
-</a>
+                <Link to={`/jobs/${job.id}/apply`} className="flex-1">
+                  <Button size="lg" className="w-full">
+                    Apply Now
+                  </Button>
+                </Link>
+
                 <Button variant="outline" size="lg">
                   <Bookmark className="h-5 w-5" />
                 </Button>
+
                 <Button variant="outline" size="lg">
                   <Share2 className="h-5 w-5" />
                 </Button>
@@ -207,9 +202,11 @@ export default function JobDetails() {
                       <span>{job.type}</span>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full mt-4">
-                    View More Jobs
-                  </Button>
+                  <Link to="/jobs">
+                    <Button variant="outline" className="w-full mt-4">
+                      View More Jobs
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
 
@@ -219,9 +216,11 @@ export default function JobDetails() {
                   <p className="text-sm text-gray-600 mb-4">
                     Ready to apply? AfroPals Jobs helps candidates access verified opportunities and move forward with clarity and confidence.
                   </p>
-                  <Button className="w-full" size="lg">
-                    Apply for this Position
-                  </Button>
+                  <Link to={`/jobs/${job.id}/apply`}>
+                    <Button className="w-full" size="lg">
+                      Apply for this Position
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
 
