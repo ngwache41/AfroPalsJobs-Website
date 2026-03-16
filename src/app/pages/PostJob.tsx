@@ -19,7 +19,6 @@ export default function PostJob() {
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
 
-      {/* HERO */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-14 md:py-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-10 items-center">
@@ -86,7 +85,7 @@ export default function PostJob() {
             <div>
               <Card className="overflow-hidden shadow-xl border-0">
                 <img
-                  src="/founder-headshot.png"
+                  src="/founder-afropals.jpg"
                   alt="AfroPals Jobs founder"
                   className="w-full h-[420px] object-cover"
                 />
@@ -107,7 +106,6 @@ export default function PostJob() {
         </div>
       </section>
 
-      {/* FORM SECTION */}
       <section className="py-16 bg-gray-50 flex-1">
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="text-center mb-10">
@@ -135,33 +133,14 @@ export default function PostJob() {
               className="bg-white p-8 rounded-xl shadow-sm border space-y-6"
             >
               <Input placeholder="Company or Employer Name" required />
-
               <Input placeholder="Job Title" required />
-
               <Input placeholder="Location (Example: Moscow, Russia)" required />
-
               <Input placeholder="Salary Range (Example: From 120,000 RUB / month)" />
-
-              <Textarea
-                placeholder="Job Description"
-                rows={5}
-                required
-              />
-
-              <Textarea
-                placeholder="Requirements"
-                rows={4}
-              />
-
-              <Textarea
-                placeholder="Responsibilities"
-                rows={4}
-              />
-
+              <Textarea placeholder="Job Description" rows={5} required />
+              <Textarea placeholder="Requirements" rows={4} />
+              <Textarea placeholder="Responsibilities" rows={4} />
               <Input placeholder="Contact Email" required />
-
               <Input placeholder="Phone or WhatsApp Number" />
-
               <Button className="w-full" size="lg">
                 Submit Job for Review
               </Button>
