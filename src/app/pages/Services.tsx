@@ -10,13 +10,18 @@ import {
   Users,
   BadgeHelp,
 } from "lucide-react";
+import Seo from "../components/Seo";
 
 export default function Services() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <Seo
+        title="Services | AfroPals Jobs Recruitment, Invitation Support & Visa Guidance"
+        description="Explore AfroPals Jobs services including recruitment support, invitation support, visa assistance guidance, employer support, and candidate guidance in Russia."
+      />
+
       <Header />
 
-      {/* HERO */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
         <div className="container mx-auto px-4 text-center max-w-4xl">
           <h1 className="text-4xl md:text-5xl mb-6">Our Services</h1>
@@ -33,7 +38,6 @@ export default function Services() {
         </div>
       </section>
 
-      {/* SERVICES GRID */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -112,7 +116,6 @@ export default function Services() {
         </div>
       </section>
 
-      {/* EXPERIENCE STRIP */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8 text-center">
@@ -146,7 +149,6 @@ export default function Services() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-20 bg-blue-600 text-white">
         <div className="container mx-auto px-4 text-center max-w-3xl">
           <h2 className="text-3xl md:text-4xl mb-4">

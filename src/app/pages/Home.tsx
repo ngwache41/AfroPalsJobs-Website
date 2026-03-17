@@ -1,7 +1,6 @@
 import { Search, TrendingUp, Users, Award, ArrowRight, Building } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Card, CardContent } from "../components/ui/card";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import LaunchBanner from "../components/LaunchBanner";
@@ -9,12 +8,18 @@ import JobCard from "../components/JobCard";
 import { jobs } from "../data/jobs";
 import { Link } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import Seo from "../components/Seo";
 
 export default function Home() {
   const featuredJobs = jobs.slice(0, 3);
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Seo
+        title="AfroPals Jobs | Jobs, Recruitment, Invitation Support & Visa Guidance in Russia"
+        description="AfroPals Jobs connects international job seekers with verified employers in Russia and provides recruitment support, invitation support, and visa assistance guidance."
+      />
+
       <LaunchBanner />
       <Header />
 

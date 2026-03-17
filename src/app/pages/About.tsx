@@ -4,13 +4,18 @@ import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Globe2, ShieldCheck, Users, BriefcaseBusiness, Award } from "lucide-react";
 import { Link } from "react-router";
+import Seo from "../components/Seo";
 
 export default function About() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <Seo
+        title="About AfroPals Jobs | Recruitment, Visa Processing Experience & Founder Story"
+        description="Learn about AfroPals Jobs, the founder’s 10+ years of visa processing experience, 4+ years in recruitment, and the mission to connect candidates with verified employers in Russia."
+      />
+
       <Header />
 
-      {/* HERO SECTION */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -59,7 +64,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* EXPERIENCE HIGHLIGHT */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
@@ -96,7 +100,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* FOUNDER MESSAGE */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-3xl mb-6 text-center">Founder’s Vision</h2>
@@ -137,7 +140,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* VALUES SECTION */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -192,7 +194,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* LEGAL INFO */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 max-w-3xl text-center">
           <Card>
