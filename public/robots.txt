@@ -1,21 +1,4 @@
-# Afro-Personala - Robots.txt
 User-agent: *
 Allow: /
-Allow: /jobs
-Allow: /jobs/*
-Allow: /terms
-Allow: /privacy
-Allow: /employer-agreement
-Allow: /candidate-consent
 
-# Disallow admin/auth pages
-Disallow: /admin
-Disallow: /login
-Disallow: /register
-Disallow: /dashboard
-
-# Sitemap
 Sitemap: https://afropalsjobs.ru/sitemap.xml
-
-# Crawl-delay for polite crawlers
-Crawl-delay: 1
