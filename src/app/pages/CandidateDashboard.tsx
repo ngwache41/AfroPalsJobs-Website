@@ -139,9 +139,11 @@ export default function CandidateDashboard() {
                     </Button>
                   </Link>
 
-                  <Button variant="outline" className="w-full">
-                    Upload CV
-                  </Button>
+                  <Link to="/resume">
+                    <Button variant="outline" className="w-full">
+                      Upload CV
+                    </Button>
+                  </Link>
                 </div>
 
                 <div className="mt-8 p-4 rounded-lg bg-blue-50 border border-blue-100">
