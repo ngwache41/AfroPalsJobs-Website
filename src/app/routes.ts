@@ -12,6 +12,7 @@ import PostJob from "./pages/PostJob";
 import EmployerDashboard from "./pages/EmployerDashboard";
 import CandidateDashboard from "./pages/CandidateDashboard";
 import CandidateProfile from "./pages/CandidateProfile";
+import SavedJobs from "./pages/SavedJobs";
 import Applications from "./pages/Applications";
 import JobManagement from "./pages/JobManagement";
 import Terms from "./pages/Terms";
@@ -67,6 +68,10 @@ export const router = createBrowserRouter([
   {
     path: "/candidate-profile",
     Component: CandidateProfile,
+  },
+  {
+    path: "/saved-jobs",
+    Component: SavedJobs,
   },
   {
     path: "/applications",

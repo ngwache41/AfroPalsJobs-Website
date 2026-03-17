@@ -133,12 +133,14 @@ export default function CandidateDashboard() {
                     <Button className="w-full">Update Profile</Button>
                   </Link>
 
-                  <Button variant="outline" className="w-full">
-                    Upload CV
-                  </Button>
+                  <Link to="/saved-jobs">
+                    <Button variant="outline" className="w-full">
+                      Saved Jobs
+                    </Button>
+                  </Link>
 
                   <Button variant="outline" className="w-full">
-                    Saved Jobs
+                    Upload CV
                   </Button>
                 </div>
 
