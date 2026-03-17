@@ -63,7 +63,7 @@ export default function CandidateDashboard() {
                   <span className="text-sm text-gray-500">New</span>
                 </div>
                 <h2 className="text-3xl mb-2">3</h2>
-                <p className="text-gray-600">New Opportunities</p>
+                <p className="text-gray-600">Notifications</p>
               </CardContent>
             </Card>
           </div>
@@ -142,6 +142,12 @@ export default function CandidateDashboard() {
                   <Link to="/resume">
                     <Button variant="outline" className="w-full">
                       Upload CV
+                    </Button>
+                  </Link>
+
+                  <Link to="/notifications">
+                    <Button variant="outline" className="w-full">
+                      Notifications
                     </Button>
                   </Link>
                 </div>
