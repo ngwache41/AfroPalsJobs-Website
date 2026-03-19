@@ -16,14 +16,13 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <Seo
-        title="AfroPals Jobs | Jobs, Recruitment, Invitation Support & Visa Guidance in Russia"
-        description="AfroPals Jobs connects international job seekers with verified employers in Russia and provides recruitment support, invitation support, and visa assistance guidance."
+        title="AfroPals Jobs | Jobs in Russia for Foreigners, Africans, Recruitment & Visa Guidance"
+        description="AfroPals Jobs connects foreigners and African job seekers with verified employers in Russia. Explore jobs, recruitment support, invitation support, and visa guidance."
       />
 
       <LaunchBanner />
       <Header />
 
-      {/* HERO */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-24">
         <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
           <div>
@@ -96,7 +95,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PLATFORM STATS */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -147,7 +145,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FEATURED JOBS */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
@@ -174,7 +171,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOUNDER SECTION */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
           <div>
@@ -223,7 +219,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ABOUT */}
       <section className="py-16 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
         <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
           <ImageWithFallback
@@ -261,7 +256,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-20 bg-blue-600 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl mb-4">
