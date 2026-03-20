@@ -16,8 +16,8 @@ export default function Services() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Seo
-        title="Services | AfroPals Jobs Recruitment, Invitation Support & Visa Guidance"
-        description="Explore AfroPals Jobs services including recruitment support, invitation support, visa assistance guidance, employer support, and candidate guidance in Russia."
+        title="Services | AfroPals Jobs Recruitment, Invitation Support and Visa Guidance"
+        description="Explore AfroPals Jobs services including recruitment support, invitation support, visa guidance, employer support, and international candidate assistance in Russia."
       />
 
       <Header />
@@ -31,10 +31,6 @@ export default function Services() {
             organizations seeking trusted international opportunities and
             structured hiring support in Russia.
           </p>
-          <p className="text-gray-600">
-            Our approach is built around transparency, guidance, experience,
-            and practical support at every important stage of the process.
-          </p>
         </div>
       </section>
 
@@ -47,8 +43,8 @@ export default function Services() {
                 <h2 className="text-2xl mb-3">Recruitment Support</h2>
                 <p className="text-gray-600 leading-7">
                   We help connect verified employers with motivated candidates
-                  across different sectors including education, household
-                  support, hospitality, warehouse, construction, and more.
+                  across education, household support, hospitality, warehouse,
+                  construction, and more.
                 </p>
               </CardContent>
             </Card>
@@ -58,9 +54,8 @@ export default function Services() {
                 <FileCheck className="h-10 w-10 text-blue-600 mb-4" />
                 <h2 className="text-2xl mb-3">Invitation Support</h2>
                 <p className="text-gray-600 leading-7">
-                  We provide guidance for invitation-related processes where
-                  required, including tourist, private, business, and student
-                  invitation support pathways depending on the applicant’s needs.
+                  We provide guidance for invitation-related processes including
+                  tourist, private, business, and student invitation pathways.
                 </p>
               </CardContent>
             </Card>
@@ -68,11 +63,11 @@ export default function Services() {
             <Card className="shadow-sm border">
               <CardContent className="pt-8">
                 <Globe2 className="h-10 w-10 text-blue-600 mb-4" />
-                <h2 className="text-2xl mb-3">Visa Assistance Guidance</h2>
+                <h2 className="text-2xl mb-3">Visa Guidance</h2>
                 <p className="text-gray-600 leading-7">
                   With more than 10 years of visa processing experience, we
-                  provide practical assistance and professional guidance to help
-                  applicants better understand documentation and processing steps.
+                  provide practical guidance to help applicants better
+                  understand documentation and procedures.
                 </p>
               </CardContent>
             </Card>
@@ -83,8 +78,7 @@ export default function Services() {
                 <h2 className="text-2xl mb-3">Candidate Support</h2>
                 <p className="text-gray-600 leading-7">
                   We support candidates from Africa, Asia, Europe, Australia,
-                  New Zealand, and the world at large by helping them navigate
-                  opportunities with greater confidence and clarity.
+                  New Zealand, and other parts of the world.
                 </p>
               </CardContent>
             </Card>
@@ -95,8 +89,7 @@ export default function Services() {
                 <h2 className="text-2xl mb-3">Employer Support</h2>
                 <p className="text-gray-600 leading-7">
                   Employers, families, and organizations can use AfroPals Jobs
-                  to reach serious candidates and promote opportunities through
-                  a more professional and transparent process.
+                  to reach serious candidates through a more transparent process.
                 </p>
               </CardContent>
             </Card>
@@ -106,42 +99,9 @@ export default function Services() {
                 <BadgeHelp className="h-10 w-10 text-blue-600 mb-4" />
                 <h2 className="text-2xl mb-3">Professional Guidance</h2>
                 <p className="text-gray-600 leading-7">
-                  Beyond listings, we aim to provide structured information and
-                  guidance that helps both employers and applicants make more
-                  informed and reliable decisions.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <Card className="shadow-sm border">
-              <CardContent className="pt-8 pb-8">
-                <h3 className="text-3xl mb-2">10+ Years</h3>
-                <p className="text-gray-600">
-                  Visa processing and documentation guidance experience.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-sm border">
-              <CardContent className="pt-8 pb-8">
-                <h3 className="text-3xl mb-2">4+ Years</h3>
-                <p className="text-gray-600">
-                  Recruitment and candidate placement experience.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-sm border">
-              <CardContent className="pt-8 pb-8">
-                <h3 className="text-3xl mb-2">Global Reach</h3>
-                <p className="text-gray-600">
-                  Serving applicants and employers across multiple regions.
+                  Beyond listings, we provide structured information and
+                  guidance that helps both employers and applicants make
+                  informed decisions.
                 </p>
               </CardContent>
             </Card>
@@ -155,9 +115,8 @@ export default function Services() {
             Let’s Help You Move Forward Professionally
           </h2>
           <p className="text-blue-100 text-lg mb-8">
-            Whether you are looking for a trusted opportunity, professional
-            visa-related guidance, or support with recruitment, AfroPals Jobs
-            is ready to assist.
+            Whether you are looking for a trusted opportunity or visa-related
+            guidance, AfroPals Jobs is ready to assist.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

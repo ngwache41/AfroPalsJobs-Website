@@ -10,8 +10,8 @@ export default function About() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Seo
-        title="About AfroPals Jobs | Recruitment, Visa Processing Experience & Founder Story"
-        description="Learn about AfroPals Jobs, the founder’s 10+ years of visa processing experience, 4+ years in recruitment, and the mission to connect candidates with verified employers in Russia."
+        title="About AfroPals Jobs | Recruitment, Visa Processing Experience and Founder Story"
+        description="Learn about AfroPals Jobs, the founder’s visa processing and recruitment experience, and the mission to connect international job seekers with verified employers in Russia."
       />
 
       <Header />
@@ -109,24 +109,13 @@ export default function About() {
               <p className="text-gray-700 leading-8 mb-6">
                 AfroPals Jobs was founded with a clear vision: to build a
                 trusted bridge between international job seekers and legitimate
-                employers in Russia. Many candidates search for work abroad with
-                hope and ambition, yet often face confusion, lack of direction,
-                and unreliable channels.
+                employers in Russia.
               </p>
 
               <p className="text-gray-700 leading-8 mb-6">
                 With more than 10 years of experience in visa processing and
                 over 4 years of recruiting experience, the founder brings both
                 practical knowledge and industry insight into the platform.
-                This combination allows AfroPals Jobs to offer more than job
-                listings — it offers guidance, structure, and confidence.
-              </p>
-
-              <p className="text-gray-700 leading-8 mb-6">
-                The platform is designed to support employers, private families,
-                and organizations looking for serious candidates in areas such
-                as education, household support, hospitality, construction,
-                warehouse operations, and other essential sectors.
               </p>
 
               <p className="text-gray-700 leading-8">
@@ -191,20 +180,6 @@ export default function About() {
               </CardContent>
             </Card>
           </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4 max-w-3xl text-center">
-          <Card>
-            <CardContent className="pt-8 pb-8">
-              <h2 className="text-2xl mb-3">Registered Business Information</h2>
-              <p className="text-gray-600 mb-2">
-                AfroPals Jobs operates as a professional recruitment and support platform.
-              </p>
-              <p className="font-semibold">ОГРНИП: 325774600487744</p>
-            </CardContent>
-          </Card>
         </div>
       </section>
 
