@@ -50,6 +50,10 @@ export default function Header() {
             About
           </Link>
 
+          <Link to="/faq" className="hover:text-blue-600 transition-colors">
+            FAQ
+          </Link>
+
           <Link to="/contact" className="hover:text-blue-600 transition-colors">
             Contact
           </Link>
@@ -112,6 +116,14 @@ export default function Header() {
             onClick={closeMobileMenu}
           >
             About
+          </Link>
+
+          <Link
+            to="/faq"
+            className="block text-gray-700 hover:text-blue-600 transition-colors"
+            onClick={closeMobileMenu}
+          >
+            FAQ
           </Link>
 
           <Link
