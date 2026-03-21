@@ -44,20 +44,21 @@ export default function Home() {
             </p>
 
             {/* SEARCH */}
-            <div className="flex gap-2 mb-8">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Search jobs, skills, or keywords"
-                  className="pl-10 h-12"
-                />
-              </div>
+           <div className="flex gap-2 mb-8 items-stretch">
+  <div className="relative flex-1">
+    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
 
-              <Button size="lg" className="px-8">
-                Search
-              </Button>
-            </div>
+    <Input
+      type="text"
+      placeholder="Search jobs, skills, or keywords"
+      className="pl-10 h-12"
+    />
+  </div>
+
+  <Button size="lg" className="h-12 px-6">
+    Search
+  </Button>
+</div>
 
             {/* POPULAR */}
             <div className="flex flex-wrap gap-2 text-sm">
