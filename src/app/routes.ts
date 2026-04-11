@@ -13,43 +13,43 @@ import CandidateConsent from "./pages/CandidateConsent";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    Component: App,
     children: [
       {
         index: true,
-        element: <Home />,
+        Component: Home,
       },
       {
         path: "jobs",
-        element: <JobsPage />,
+        Component: JobsPage,
       },
       {
         path: "visa-invitations",
-        element: <VisaApplicationPage />,
+        Component: VisaApplicationPage,
       },
       {
         path: "admin-dashboard",
-        element: <AdminDashboardPage />,
+        Component: AdminDashboardPage,
       },
       {
         path: "jobs/:id",
-        element: <JobDetails />,
+        Component: JobDetails,
       },
       {
         path: "terms",
-        element: <Terms />,
+        Component: Terms,
       },
       {
         path: "privacy",
-        element: <Privacy />,
+        Component: Privacy,
       },
       {
         path: "employer-agreement",
-        element: <EmployerAgreement />,
+        Component: EmployerAgreement,
       },
       {
         path: "candidate-consent",
-        element: <CandidateConsent />,
+        Component: CandidateConsent,
       },
     ],
   },
