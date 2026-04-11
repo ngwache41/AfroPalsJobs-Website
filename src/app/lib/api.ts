@@ -1,5 +1,8 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://afropals-backend.onrender.com"; // fallback for production
+
+// ===== TYPES =====
 
 export type Job = {
   id: number;
@@ -43,11 +46,14 @@ export type VisaApplicationCreate = {
   extra_notes?: string;
 };
 
+// ===== JOBS =====
+
 export async function getJobs(): Promise<Job[]> {
   const response = await fetch(`${API_BASE_URL}/jobs`);
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch jobs: ${response.status}`);
+    const text = await response.text();
+    throw new Error(`Failed to fetch jobs: ${response.status} - ${text}`);
   }
 
   return response.json();
@@ -63,11 +69,14 @@ export async function createJob(payload: Omit<Job, "id">): Promise<Job> {
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to create job: ${response.status}`);
+    const text = await response.text();
+    throw new Error(`Failed to create job: ${response.status} - ${text}`);
   }
 
   return response.json();
 }
+
+// ===== VISA APPLICATIONS =====
 
 export async function createVisaApplication(
   payload: VisaApplicationCreate
@@ -81,7 +90,10 @@ export async function createVisaApplication(
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to create visa application: ${response.status}`);
+    const text = await response.text();
+    throw new Error(
+      `Failed to create visa application: ${response.status} - ${text}`
+    );
   }
 
   return response.json();
@@ -91,7 +103,10 @@ export async function getVisaApplications(): Promise<VisaApplication[]> {
   const response = await fetch(`${API_BASE_URL}/visa-applications`);
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch visa applications: ${response.status}`);
+    const text = await response.text();
+    throw new Error(
+      `Failed to fetch visa applications: ${response.status} - ${text}`
+    );
   }
 
   return response.json();
@@ -113,7 +128,10 @@ export async function updateVisaApplicationStatus(
   );
 
   if (!response.ok) {
-    throw new Error(`Failed to update visa application status: ${response.status}`);
+    const text = await response.text();
+    throw new Error(
+      `Failed to update visa application status: ${response.status} - ${text}`
+    );
   }
 
   return response.json();
