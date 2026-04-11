@@ -1,10 +1,9 @@
-import { useState } from "react";
-import AdminDashboardPage from "./pages/AdminDashboardPage";
-import JobsPage from "./pages/JobsPage";
-import VisaApplicationPage from "./pages/VisaApplicationPage";
+import { Link, Outlet, useLocation } from "react-router";
 
 export default function App() {
-  const [activePage, setActivePage] = useState<"jobs" | "visa" | "admin">("jobs");
+  const location = useLocation();
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <div
@@ -52,61 +51,79 @@ export default function App() {
           </div>
 
           <nav style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <button
-              onClick={() => setActivePage("jobs")}
+            <Link
+              to="/"
               style={{
                 padding: "10px 18px",
                 borderRadius: "999px",
-                border: activePage === "jobs" ? "1px solid #fff" : "1px solid #374151",
-                cursor: "pointer",
-                background: activePage === "jobs" ? "#fff" : "#1f2937",
-                color: activePage === "jobs" ? "#111827" : "#fff",
+                border: isActive("/") ? "1px solid #fff" : "1px solid #374151",
+                textDecoration: "none",
+                background: isActive("/") ? "#fff" : "#1f2937",
+                color: isActive("/") ? "#111827" : "#fff",
+                fontWeight: 600,
+                transition: "all 0.2s ease",
+              }}
+            >
+              Home
+            </Link>
+
+            <Link
+              to="/jobs"
+              style={{
+                padding: "10px 18px",
+                borderRadius: "999px",
+                border: isActive("/jobs") ? "1px solid #fff" : "1px solid #374151",
+                textDecoration: "none",
+                background: isActive("/jobs") ? "#fff" : "#1f2937",
+                color: isActive("/jobs") ? "#111827" : "#fff",
                 fontWeight: 600,
                 transition: "all 0.2s ease",
               }}
             >
               Jobs
-            </button>
+            </Link>
 
-            <button
-              onClick={() => setActivePage("visa")}
+            <Link
+              to="/visa-invitations"
               style={{
                 padding: "10px 18px",
                 borderRadius: "999px",
-                border: activePage === "visa" ? "1px solid #fff" : "1px solid #374151",
-                cursor: "pointer",
-                background: activePage === "visa" ? "#fff" : "#1f2937",
-                color: activePage === "visa" ? "#111827" : "#fff",
+                border: isActive("/visa-invitations")
+                  ? "1px solid #fff"
+                  : "1px solid #374151",
+                textDecoration: "none",
+                background: isActive("/visa-invitations") ? "#fff" : "#1f2937",
+                color: isActive("/visa-invitations") ? "#111827" : "#fff",
                 fontWeight: 600,
                 transition: "all 0.2s ease",
               }}
             >
               Visa & Invitations
-            </button>
+            </Link>
 
-            <button
-              onClick={() => setActivePage("admin")}
+            <Link
+              to="/admin-dashboard"
               style={{
                 padding: "10px 18px",
                 borderRadius: "999px",
-                border: activePage === "admin" ? "1px solid #fff" : "1px solid #374151",
-                cursor: "pointer",
-                background: activePage === "admin" ? "#fff" : "#1f2937",
-                color: activePage === "admin" ? "#111827" : "#fff",
+                border: isActive("/admin-dashboard")
+                  ? "1px solid #fff"
+                  : "1px solid #374151",
+                textDecoration: "none",
+                background: isActive("/admin-dashboard") ? "#fff" : "#1f2937",
+                color: isActive("/admin-dashboard") ? "#111827" : "#fff",
                 fontWeight: 600,
                 transition: "all 0.2s ease",
               }}
             >
               Admin Dashboard
-            </button>
+            </Link>
           </nav>
         </div>
       </header>
 
       <main>
-        {activePage === "jobs" && <JobsPage />}
-        {activePage === "visa" && <VisaApplicationPage />}
-        {activePage === "admin" && <AdminDashboardPage />}
+        <Outlet />
       </main>
     </div>
   );
