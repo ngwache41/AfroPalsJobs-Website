@@ -1,235 +1,312 @@
-import { Search, TrendingUp, Users, Award, ArrowRight, Building, Clock, DollarSign } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Card, CardContent } from "../components/ui/card";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import LaunchBanner from "../components/LaunchBanner";
-import JobCard from "../components/JobCard";
-import { jobs } from "../data/jobs";
-import { Link } from "react-router";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { Link } from "react-router-dom";
+
+function sectionStyle(): React.CSSProperties {
+  return {
+    maxWidth: "1200px",
+    margin: "0 auto",
+    padding: "72px 24px",
+  };
+}
+
+function cardStyle(): React.CSSProperties {
+  return {
+    background: "#fff",
+    borderRadius: "20px",
+    padding: "28px",
+    boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+    border: "1px solid #e5e7eb",
+  };
+}
 
 export default function Home() {
-  const featuredJobs = jobs.slice(0, 3);
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <LaunchBanner />
-      <Header />
+    <div>
+      <section
+        style={{
+          background:
+            "linear-gradient(180deg, #eef2ff 0%, #f8fafc 45%, #f5f7fb 100%)",
+        }}
+      >
+        <div
+          style={{
+            ...sectionStyle(),
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: "32px",
+            alignItems: "center",
+          }}
+        >
+          <div>
+            <span
+              style={{
+                display: "inline-block",
+                padding: "8px 14px",
+                borderRadius: "999px",
+                background: "#e0e7ff",
+                color: "#3730a3",
+                fontWeight: 700,
+                fontSize: "13px",
+                marginBottom: "18px",
+              }}
+            >
+              Verified opportunities in Russia
+            </span>
 
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-50 to-indigo-100 py-20 md:py-32">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-4xl md:text-6xl mb-6">
-                Find Verified Jobs & Visas Assistance in Russia
-              </h1>
-              <p className="text-lg md:text-xl text-gray-600 mb-8">
-                Connect with verified employers,visas facilitators, discover real opportunities, and apply with confidence through AfroPals Jobs.
-              </p>
+            <h1
+              style={{
+                margin: "0 0 18px 0",
+                fontSize: "48px",
+                lineHeight: 1.1,
+                color: "#0f172a",
+              }}
+            >
+              Jobs, visa support, and invitation assistance in one place
+            </h1>
 
-              <div className="flex gap-2 mb-8">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search jobs, skills,visas or keywords"
-                    className="pl-10 h-12"
-                  />
-                </div>
-                <Button size="lg" className="px-8">
-                  Search
-                </Button>
-              </div>
+            <p
+              style={{
+                margin: "0 0 28px 0",
+                fontSize: "18px",
+                lineHeight: 1.7,
+                color: "#475569",
+                maxWidth: "720px",
+              }}
+            >
+              AfroPals Jobs connects international candidates with verified job
+              opportunities, invitation support, and visa application guidance.
+              We make the process clearer, safer, and easier to follow.
+            </p>
 
-              <div className="flex flex-wrap gap-2">
-                <span className="text-sm text-gray-600">Popular:</span>
-                <button className="text-sm text-blue-600 hover:underline">English Teacher/ Governor/ Governess</button>
-                <button className="text-sm text-blue-600 hover:underline">Nanny/ Manny</button>
-                <button className="text-sm text-blue-600 hover:underline">Warehouse/ Loader/ Offloader</button>
-                <button className="text-sm text-blue-600 hover:underline">Construction Workers/ Handyman/ Laborer</button>
-                <button className="text-sm text-blue-600 hover:underline">Dishwasher/ Hotpot Washer/ Cleaner</button>
-                <button className="text-sm text-blue-600 hover:underline">Tourist Visa/ Private Visa/ Study Visa/ Employment Visa</button>
-              </div>
+            <div
+              style={{
+                display: "flex",
+                gap: "14px",
+                flexWrap: "wrap",
+              }}
+            >
+              <Link
+                to="/jobs"
+                style={{
+                  background: "#111827",
+                  color: "#fff",
+                  textDecoration: "none",
+                  padding: "14px 22px",
+                  borderRadius: "12px",
+                  fontWeight: 700,
+                }}
+              >
+                Explore Jobs
+              </Link>
+
+              <Link
+                to="/visa"
+                style={{
+                  background: "#fff",
+                  color: "#111827",
+                  textDecoration: "none",
+                  padding: "14px 22px",
+                  borderRadius: "12px",
+                  fontWeight: 700,
+                  border: "1px solid #d1d5db",
+                }}
+              >
+                Apply for Visa Support
+              </Link>
             </div>
+          </div>
 
-            <div className="hidden md:block">
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1758518732175-5d608ba3abdf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBidXNpbmVzcyUyMHRlYW0lMjBtZWV0aW5nfGVufDF8fHx8MTc3MzIxNzUwM3ww&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="Professional team meeting"
-                className="rounded-lg shadow-2xl w-full h-[400px] object-cover"
-              />
+          <div style={cardStyle()}>
+            <h3 style={{ marginTop: 0, fontSize: "24px" }}>Why candidates trust us</h3>
+            <div
+              style={{
+                display: "grid",
+                gap: "16px",
+              }}
+            >
+              <div>
+                <strong>Verified opportunities</strong>
+                <p style={{ margin: "8px 0 0 0", color: "#475569", lineHeight: 1.6 }}>
+                  We focus on trusted job listings and practical guidance for
+                  international applicants.
+                </p>
+              </div>
+
+              <div>
+                <strong>Visa and invitation support</strong>
+                <p style={{ margin: "8px 0 0 0", color: "#475569", lineHeight: 1.6 }}>
+                  We help users understand which path fits their purpose of
+                  travel, work, study, business, or private visits.
+                </p>
+              </div>
+
+              <div>
+                <strong>Simple application flow</strong>
+                <p style={{ margin: "8px 0 0 0", color: "#475569", lineHeight: 1.6 }}>
+                  Our platform allows candidates to submit details online and be
+                  reviewed through an admin dashboard.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="flex justify-center mb-3">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <Building className="h-6 w-6 text-blue-600" />
-                </div>
-              </div>
-              <div className="text-3xl mb-1">2,500+</div>
-              <div className="text-gray-600">Companies</div>
-            </div>
-            <div className="text-center">
-              <div className="flex justify-center mb-3">
-                <div className="bg-green-100 p-3 rounded-full">
-                  <TrendingUp className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-              <div className="text-3xl mb-1">15,000+</div>
-              <div className="text-gray-600">Open Positions</div>
-            </div>
-            <div className="text-center">
-              <div className="flex justify-center mb-3">
-                <div className="bg-purple-100 p-3 rounded-full">
-                  <Users className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-              <div className="text-3xl mb-1">50,000+</div>
-              <div className="text-gray-600">Active Users</div>
-            </div>
-            <div className="text-center">
-              <div className="flex justify-center mb-3">
-                <div className="bg-orange-100 p-3 rounded-full">
-                  <Award className="h-6 w-6 text-orange-600" />
-                </div>
-              </div>
-              <div className="text-3xl mb-1">95%</div>
-              <div className="text-gray-600">Success Rate</div>
-            </div>
-          </div>
+      <section id="services" style={sectionStyle()}>
+        <div style={{ textAlign: "center", marginBottom: "36px" }}>
+          <h2 style={{ margin: 0, fontSize: "36px" }}>Our Services</h2>
+          <p style={{ color: "#475569", marginTop: "14px", fontSize: "17px" }}>
+            Practical support for candidates, employers, and travelers.
+          </p>
         </div>
-      </section>
 
-      {/* Featured Jobs */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h2 className="text-3xl mb-2">Featured Jobs</h2>
-              <p className="text-gray-600">Hand-picked opportunities from top companies</p>
-            </div>
-            <Link to="/jobs">
-              <Button variant="outline">
-                View All Jobs
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredJobs.map((job) => (
-              <JobCard key={job.id} {...job} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl mb-4">How It Works</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Get started with your job search in three simple steps
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: "22px",
+          }}
+        >
+          <div style={cardStyle()}>
+            <h3 style={{ marginTop: 0 }}>Job Opportunities</h3>
+            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+              Browse verified vacancies and submit interest through a cleaner,
+              more organized hiring process.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl text-blue-600">1</span>
-                </div>
-                <h3 className="text-xl mb-2">Create Your Profile</h3>
-                <p className="text-gray-600">
-                  Sign up and build your professional profile to showcase your skills and experience.
-                </p>
-              </CardContent>
-            </Card>
+          <div style={cardStyle()}>
+            <h3 style={{ marginTop: 0 }}>Visa Assistance</h3>
+            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+              Submit visa application details for work, study, tourist,
+              business, and private visit support.
+            </p>
+          </div>
 
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl text-green-600">2</span>
-                </div>
-                <h3 className="text-xl mb-2">Search & Apply</h3>
-                <p className="text-gray-600">
-                  Browse thousands of job listings and apply to positions that match your skills.
-                </p>
-              </CardContent>
-            </Card>
+          <div style={cardStyle()}>
+            <h3 style={{ marginTop: 0 }}>Invitation Support</h3>
+            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+              Request help with invitation-related processes connected to your
+              purpose of travel.
+            </p>
+          </div>
 
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl text-purple-600">3</span>
-                </div>
-                <h3 className="text-xl mb-2">Get Hired</h3>
-                <p className="text-gray-600">
-                  Connect with employers, ace your interviews, and land your dream job.
-                </p>
-              </CardContent>
-            </Card>
+          <div style={cardStyle()}>
+            <h3 style={{ marginTop: 0 }}>Application Review</h3>
+            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+              Applications submitted through the site are organized for admin
+              review and follow-up.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-16 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1718220216044-006f43e3a9b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvZmZpY2UlMjB3b3Jrc3BhY2V8ZW58MXx8fHwxNzczMjQwNjA3fDA&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="Modern office workspace"
-                className="rounded-lg shadow-xl w-full h-[400px] object-cover"
-              />
-            </div>
-            <div>
-              <h2 className="text-3xl md:text-4xl mb-6">About TalentHub</h2>
-              <p className="text-gray-300 mb-6">
-                We're on a mission to connect talented professionals with opportunities that match their skills, ambitions, and values. Since 2020, we've helped over 50,000 people find their dream jobs.
-              </p>
-              <p className="text-gray-300 mb-8">
-                Our platform uses advanced matching algorithms and personalized recommendations to ensure you find the right fit. Whether you're a recent graduate or an experienced professional, we're here to support your career journey.
-              </p>
-              <Button variant="secondary" size="lg">
-                Learn More About Us
-              </Button>
-            </div>
+      <section id="about" style={{ ...sectionStyle(), paddingTop: "12px" }}>
+        <div
+          style={{
+            ...cardStyle(),
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: "28px",
+          }}
+        >
+          <div>
+            <h2 style={{ marginTop: 0, fontSize: "34px" }}>About AfroPals Jobs</h2>
+            <p style={{ color: "#475569", lineHeight: 1.8 }}>
+              AfroPals Jobs is built to support international job seekers and
+              applicants who need trusted direction for work opportunities,
+              invitation support, and visa-related processes in Russia.
+            </p>
+            <p style={{ color: "#475569", lineHeight: 1.8 }}>
+              Our goal is to create a more transparent and organized journey
+              from first inquiry to final submission.
+            </p>
+          </div>
+
+          <div>
+            <h3 style={{ marginTop: 0 }}>What makes us different</h3>
+            <ul style={{ color: "#475569", lineHeight: 1.9, paddingLeft: "18px" }}>
+              <li>Clear online application flow</li>
+              <li>Centralized jobs and visa support</li>
+              <li>Admin review system for better tracking</li>
+              <li>Professional and scalable platform structure</li>
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section id="contact" className="py-20 bg-blue-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl mb-4">Ready to Start Your Journey?</h2>
-          <p className="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
-            Join thousands of professionals who found their dream jobs through TalentHub
+      <section id="faq" style={sectionStyle()}>
+        <div style={{ textAlign: "center", marginBottom: "36px" }}>
+          <h2 style={{ margin: 0, fontSize: "36px" }}>Frequently Asked Questions</h2>
+          <p style={{ color: "#475569", marginTop: "14px", fontSize: "17px" }}>
+            Answers to common questions from applicants and visitors.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary">
-              Create Free Account
-            </Button>
-            <Button size="lg" variant="outline" className="bg-transparent text-white border-white hover:bg-white/10">
-              Contact Our Team
-            </Button>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gap: "18px",
+          }}
+        >
+          <div style={cardStyle()}>
+            <h3 style={{ marginTop: 0 }}>Can I apply for a job directly from the website?</h3>
+            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+              Yes. The website is designed to help organize opportunities and
+              candidate submissions in one place.
+            </p>
+          </div>
+
+          <div style={cardStyle()}>
+            <h3 style={{ marginTop: 0 }}>Can I request visa or invitation support?</h3>
+            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+              Yes. Use the Visa & Invitations page to submit the relevant
+              information for your case.
+            </p>
+          </div>
+
+          <div style={cardStyle()}>
+            <h3 style={{ marginTop: 0 }}>How do you review applications?</h3>
+            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+              Submitted entries are collected into the admin dashboard for
+              internal review and status management.
+            </p>
           </div>
         </div>
       </section>
 
-      <Footer />
+      <section id="contact" style={{ ...sectionStyle(), paddingTop: "12px" }}>
+        <div
+          style={{
+            ...cardStyle(),
+            textAlign: "center",
+          }}
+        >
+          <h2 style={{ marginTop: 0, fontSize: "34px" }}>Contact Us</h2>
+          <p style={{ color: "#475569", lineHeight: 1.8, maxWidth: "760px", margin: "0 auto 20px auto" }}>
+            Reach out for general inquiries, job-related questions, and visa or
+            invitation support information.
+          </p>
+
+          <div
+            style={{
+              display: "grid",
+              gap: "10px",
+              color: "#111827",
+              fontSize: "16px",
+            }}
+          >
+            <div>
+              <strong>Email:</strong> info@afropalsjobs.ru
+            </div>
+            <div>
+              <strong>Website:</strong> www.afropalsjobs.ru
+            </div>
+            <div>
+              <strong>Support:</strong> WhatsApp / direct assistance available
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
