@@ -1,4 +1,4 @@
-import { Outlet, Link } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 
 export default function App() {
   return (
@@ -26,19 +26,27 @@ export default function App() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: "16px",
+            flexWrap: "wrap",
           }}
         >
           <div>
             <h2 style={{ margin: 0 }}>AfroPals Jobs</h2>
-            <p style={{ margin: 0, fontSize: "14px" }}>
+            <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
               Jobs, visa support, and invitation applications
             </p>
           </div>
 
-          <nav style={{ display: "flex", gap: "12px" }}>
-            <Link to="/jobs" style={{ color: "#fff" }}>Jobs</Link>
-            <Link to="/visa" style={{ color: "#fff" }}>Visa</Link>
-            <Link to="/admin" style={{ color: "#fff" }}>Admin</Link>
+          <nav style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+            <Link to="/jobs" style={{ color: "#fff", textDecoration: "none" }}>
+              Jobs
+            </Link>
+            <Link to="/visa" style={{ color: "#fff", textDecoration: "none" }}>
+              Visa & Invitations
+            </Link>
+            <Link to="/admin" style={{ color: "#fff", textDecoration: "none" }}>
+              Admin Dashboard
+            </Link>
           </nav>
         </div>
       </header>

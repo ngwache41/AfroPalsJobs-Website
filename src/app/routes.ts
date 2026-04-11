@@ -7,23 +7,23 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    Component: App,
     children: [
       {
-        path: "/",
-        element: <JobsPage />,
+        index: true,
+        Component: JobsPage,
       },
       {
-        path: "/jobs",
-        element: <JobsPage />,
+        path: "jobs",
+        Component: JobsPage,
       },
       {
-        path: "/visa",
-        element: <VisaApplicationPage />,
+        path: "visa",
+        Component: VisaApplicationPage,
       },
       {
-        path: "/admin",
-        element: <AdminDashboardPage />,
+        path: "admin",
+        Component: AdminDashboardPage,
       },
     ],
   },
