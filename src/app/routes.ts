@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import Home from "./pages/Home";
 import JobsPage from "./pages/JobsPage";
@@ -13,43 +13,43 @@ import CandidateConsent from "./pages/CandidateConsent";
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: App,
+    element: <App />,
     children: [
       {
         index: true,
-        Component: Home,
+        element: <Home />,
       },
       {
         path: "jobs",
-        Component: JobsPage,
+        element: <JobsPage />,
       },
       {
         path: "visa-invitations",
-        Component: VisaApplicationPage,
+        element: <VisaApplicationPage />,
       },
       {
         path: "admin-dashboard",
-        Component: AdminDashboardPage,
+        element: <AdminDashboardPage />,
       },
       {
         path: "jobs/:id",
-        Component: JobDetails,
+        element: <JobDetails />,
       },
       {
         path: "terms",
-        Component: Terms,
+        element: <Terms />,
       },
       {
         path: "privacy",
-        Component: Privacy,
+        element: <Privacy />,
       },
       {
         path: "employer-agreement",
-        Component: EmployerAgreement,
+        element: <EmployerAgreement />,
       },
       {
         path: "candidate-consent",
-        Component: CandidateConsent,
+        element: <CandidateConsent />,
       },
     ],
   },

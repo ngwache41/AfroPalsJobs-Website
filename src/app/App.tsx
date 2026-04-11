@@ -1,9 +1,26 @@
-import { Link, Outlet, useLocation } from "react-router";
+import { Link, Outlet, useLocation } from "react-router-dom";
+
+function navLinkStyle(active: boolean): React.CSSProperties {
+  return {
+    padding: "10px 18px",
+    borderRadius: "999px",
+    border: active ? "1px solid #fff" : "1px solid #374151",
+    textDecoration: "none",
+    background: active ? "#fff" : "#1f2937",
+    color: active ? "#111827" : "#fff",
+    fontWeight: 600,
+    transition: "all 0.2s ease",
+    display: "inline-block",
+  };
+}
 
 export default function App() {
   const location = useLocation();
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/";
+    return location.pathname === path || location.pathname.startsWith(path + "/");
+  };
 
   return (
     <div
@@ -51,70 +68,24 @@ export default function App() {
           </div>
 
           <nav style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <Link
-              to="/"
-              style={{
-                padding: "10px 18px",
-                borderRadius: "999px",
-                border: isActive("/") ? "1px solid #fff" : "1px solid #374151",
-                textDecoration: "none",
-                background: isActive("/") ? "#fff" : "#1f2937",
-                color: isActive("/") ? "#111827" : "#fff",
-                fontWeight: 600,
-                transition: "all 0.2s ease",
-              }}
-            >
+            <Link to="/" style={navLinkStyle(isActive("/"))}>
               Home
             </Link>
 
-            <Link
-              to="/jobs"
-              style={{
-                padding: "10px 18px",
-                borderRadius: "999px",
-                border: isActive("/jobs") ? "1px solid #fff" : "1px solid #374151",
-                textDecoration: "none",
-                background: isActive("/jobs") ? "#fff" : "#1f2937",
-                color: isActive("/jobs") ? "#111827" : "#fff",
-                fontWeight: 600,
-                transition: "all 0.2s ease",
-              }}
-            >
+            <Link to="/jobs" style={navLinkStyle(isActive("/jobs"))}>
               Jobs
             </Link>
 
             <Link
               to="/visa-invitations"
-              style={{
-                padding: "10px 18px",
-                borderRadius: "999px",
-                border: isActive("/visa-invitations")
-                  ? "1px solid #fff"
-                  : "1px solid #374151",
-                textDecoration: "none",
-                background: isActive("/visa-invitations") ? "#fff" : "#1f2937",
-                color: isActive("/visa-invitations") ? "#111827" : "#fff",
-                fontWeight: 600,
-                transition: "all 0.2s ease",
-              }}
+              style={navLinkStyle(isActive("/visa-invitations"))}
             >
               Visa & Invitations
             </Link>
 
             <Link
               to="/admin-dashboard"
-              style={{
-                padding: "10px 18px",
-                borderRadius: "999px",
-                border: isActive("/admin-dashboard")
-                  ? "1px solid #fff"
-                  : "1px solid #374151",
-                textDecoration: "none",
-                background: isActive("/admin-dashboard") ? "#fff" : "#1f2937",
-                color: isActive("/admin-dashboard") ? "#111827" : "#fff",
-                fontWeight: 600,
-                transition: "all 0.2s ease",
-              }}
+              style={navLinkStyle(isActive("/admin-dashboard"))}
             >
               Admin Dashboard
             </Link>
