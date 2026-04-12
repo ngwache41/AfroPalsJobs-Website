@@ -3,20 +3,100 @@ import {
   getJobs,
   getVisaApplications,
   updateVisaApplicationStatus,
-  type Job,
-  type VisaApplication,
+  Job,
+  VisaApplication,
 } from "../lib/api";
+
+const pageWrapStyle: React.CSSProperties = {
+  maxWidth: "1200px",
+  margin: "0 auto",
+  padding: "48px 24px",
+};
+
+const heroCardStyle: React.CSSProperties = {
+  background: "#ffffff",
+  borderRadius: "24px",
+  padding: "36px",
+  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+  border: "1px solid #e5e7eb",
+  marginBottom: "28px",
+};
+
+const sectionCardStyle: React.CSSProperties = {
+  background: "#ffffff",
+  borderRadius: "22px",
+  padding: "28px",
+  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+  border: "1px solid #e5e7eb",
+};
+
+const statCardStyle: React.CSSProperties = {
+  background: "#ffffff",
+  borderRadius: "20px",
+  padding: "24px",
+  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+  border: "1px solid #e5e7eb",
+};
+
+const badgeStyle = (status: string): React.CSSProperties => {
+  const normalized = status.toLowerCase();
+
+  if (normalized === "approved") {
+    return {
+      display: "inline-block",
+      padding: "6px 12px",
+      borderRadius: "999px",
+      background: "#dcfce7",
+      color: "#166534",
+      fontWeight: 700,
+      fontSize: "13px",
+    };
+  }
+
+  if (normalized === "rejected") {
+    return {
+      display: "inline-block",
+      padding: "6px 12px",
+      borderRadius: "999px",
+      background: "#fee2e2",
+      color: "#991b1b",
+      fontWeight: 700,
+      fontSize: "13px",
+    };
+  }
+
+  return {
+    display: "inline-block",
+    padding: "6px 12px",
+    borderRadius: "999px",
+    background: "#fef3c7",
+    color: "#92400e",
+    fontWeight: 700,
+    fontSize: "13px",
+  };
+};
+
+const actionButtonStyle: React.CSSProperties = {
+  border: "1px solid #d1d5db",
+  background: "#ffffff",
+  color: "#111827",
+  borderRadius: "10px",
+  padding: "10px 14px",
+  cursor: "pointer",
+  fontWeight: 600,
+};
 
 export default function AdminDashboardPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [visaApplications, setVisaApplications] = useState<VisaApplication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
-  async function loadData() {
+  async function loadDashboardData() {
     try {
       setLoading(true);
-      setError("");
+      setErrorMessage("");
 
       const [jobsData, visaData] = await Promise.all([
         getJobs(),
@@ -25,86 +105,144 @@ export default function AdminDashboardPage() {
 
       setJobs(jobsData);
       setVisaApplications(visaData);
-    } catch (err) {
-      setError("Failed to load admin dashboard data.");
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Failed to load admin dashboard data.");
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadData();
+    loadDashboardData();
   }, []);
 
-  async function handleStatusChange(applicationId: number, newStatus: string) {
+  async function handleStatusUpdate(applicationId: number, status: string) {
     try {
-      await updateVisaApplicationStatus(applicationId, newStatus);
-      await loadData();
-    } catch (err) {
-      alert("Failed to update visa application status.");
+      setUpdatingId(applicationId);
+      await updateVisaApplicationStatus(applicationId, status);
+      await loadDashboardData();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Failed to update visa application status.");
+    } finally {
+      setUpdatingId(null);
     }
   }
 
-  if (loading) {
-    return (
-      <div style={pageWrapperStyle}>
-        <div style={pageInnerStyle}>
-          <h1>Admin Dashboard</h1>
-          <p>Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={pageWrapperStyle}>
-        <div style={pageInnerStyle}>
-          <h1>Admin Dashboard</h1>
-          <p style={{ color: "red" }}>{error}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div style={pageWrapperStyle}>
-      <div style={pageInnerStyle}>
-        <div style={heroCardStyle}>
-          <h1 style={{ margin: "0 0 10px 0", fontSize: "34px" }}>Admin Dashboard</h1>
-          <p style={{ margin: 0, color: "#6b7280", fontSize: "16px", lineHeight: 1.6 }}>
-            Review submitted jobs and visa applications from the website.
-          </p>
+    <div style={pageWrapStyle}>
+      <section style={heroCardStyle}>
+        <h1 style={{ margin: "0 0 12px 0", fontSize: "42px", color: "#0f172a" }}>
+          Admin Dashboard
+        </h1>
+        <p
+          style={{
+            margin: 0,
+            color: "#475569",
+            fontSize: "18px",
+            lineHeight: 1.7,
+            maxWidth: "860px",
+          }}
+        >
+          Review submitted jobs and visa applications from the website in one
+          organized control panel.
+        </p>
+      </section>
+
+      {errorMessage && (
+        <div
+          style={{
+            marginBottom: "24px",
+            background: "#fef2f2",
+            color: "#991b1b",
+            border: "1px solid #fecaca",
+            padding: "14px 16px",
+            borderRadius: "14px",
+          }}
+        >
+          {errorMessage}
+        </div>
+      )}
+
+      <section
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gap: "20px",
+          marginBottom: "28px",
+        }}
+      >
+        <div style={statCardStyle}>
+          <div style={{ color: "#475569", fontWeight: 600, marginBottom: "12px" }}>
+            Total Jobs
+          </div>
+          <div style={{ fontSize: "48px", fontWeight: 800, color: "#111827" }}>
+            {loading ? "..." : jobs.length}
+          </div>
         </div>
 
-        <div style={statsGridStyle}>
-          <div style={statCardStyle}>
-            <p style={statLabelStyle}>Total Jobs</p>
-            <h2 style={statValueStyle}>{jobs.length}</h2>
+        <div style={statCardStyle}>
+          <div style={{ color: "#475569", fontWeight: 600, marginBottom: "12px" }}>
+            Visa Applications
           </div>
-
-          <div style={statCardStyle}>
-            <p style={statLabelStyle}>Visa Applications</p>
-            <h2 style={statValueStyle}>{visaApplications.length}</h2>
+          <div style={{ fontSize: "48px", fontWeight: 800, color: "#111827" }}>
+            {loading ? "..." : visaApplications.length}
           </div>
         </div>
+      </section>
 
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          gap: "24px",
+        }}
+      >
         <section style={sectionCardStyle}>
-          <h2 style={sectionTitleStyle}>Jobs</h2>
+          <h2 style={{ marginTop: 0, marginBottom: "10px", fontSize: "30px" }}>
+            Jobs
+          </h2>
+          <p style={{ marginTop: 0, color: "#475569", lineHeight: 1.7 }}>
+            Submitted job listings available on the platform.
+          </p>
 
-          {jobs.length === 0 ? (
-            <p style={emptyTextStyle}>No jobs found.</p>
+          {loading ? (
+            <p style={{ color: "#475569" }}>Loading jobs...</p>
+          ) : jobs.length === 0 ? (
+            <div
+              style={{
+                background: "#f8fafc",
+                border: "1px solid #e5e7eb",
+                borderRadius: "16px",
+                padding: "18px",
+                color: "#475569",
+              }}
+            >
+              No jobs found.
+            </div>
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
               {jobs.map((job) => (
-                <div key={job.id} style={itemCardStyle}>
-                  <div style={badgeRowStyle}>
-                    <span style={primaryBadgeStyle}>{job.company}</span>
-                    <span style={secondaryBadgeStyle}>{job.location}</span>
-                  </div>
-
-                  <h3 style={{ margin: "0 0 10px 0", fontSize: "22px" }}>{job.title}</h3>
-                  <p style={{ margin: 0, color: "#4b5563", lineHeight: 1.7 }}>
+                <div
+                  key={job.id}
+                  style={{
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "18px",
+                    padding: "20px",
+                    background: "#f8fafc",
+                  }}
+                >
+                  <h3 style={{ margin: "0 0 10px 0", fontSize: "24px" }}>
+                    {job.title}
+                  </h3>
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    <strong>Company:</strong> {job.company}
+                  </p>
+                  <p style={{ margin: "0 0 12px 0" }}>
+                    <strong>Location:</strong> {job.location}
+                  </p>
+                  <p style={{ margin: 0, color: "#475569", lineHeight: 1.7 }}>
                     {job.description}
                   </p>
                 </div>
@@ -114,86 +252,160 @@ export default function AdminDashboardPage() {
         </section>
 
         <section style={sectionCardStyle}>
-          <h2 style={sectionTitleStyle}>Visa Applications</h2>
+          <h2 style={{ marginTop: 0, marginBottom: "10px", fontSize: "30px" }}>
+            Visa Applications
+          </h2>
+          <p style={{ marginTop: 0, color: "#475569", lineHeight: 1.7 }}>
+            Review applications and update their status.
+          </p>
 
-          {visaApplications.length === 0 ? (
-            <p style={emptyTextStyle}>No visa applications found.</p>
+          {loading ? (
+            <p style={{ color: "#475569" }}>Loading visa applications...</p>
+          ) : visaApplications.length === 0 ? (
+            <div
+              style={{
+                background: "#f8fafc",
+                border: "1px solid #e5e7eb",
+                borderRadius: "16px",
+                padding: "18px",
+                color: "#475569",
+              }}
+            >
+              No visa applications found.
+            </div>
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
               {visaApplications.map((application) => (
-                <div key={application.id} style={itemCardStyle}>
+                <div
+                  key={application.id}
+                  style={{
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "18px",
+                    padding: "20px",
+                    background: "#f8fafc",
+                  }}
+                >
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: "12px",
+                      gap: "16px",
+                      alignItems: "flex-start",
                       flexWrap: "wrap",
                       marginBottom: "14px",
                     }}
                   >
-                    <div style={badgeRowStyle}>
-                      <span style={primaryBadgeStyle}>{application.visa_type}</span>
-                      <span style={secondaryBadgeStyle}>{application.destination_city}</span>
-                      <span style={getStatusBadgeStyle(application.status)}>
-                        {application.status}
-                      </span>
+                    <div>
+                      <h3 style={{ margin: "0 0 8px 0", fontSize: "24px" }}>
+                        {application.full_name}
+                      </h3>
+                      <div style={{ color: "#475569", lineHeight: 1.8 }}>
+                        <div>
+                          <strong>Email:</strong> {application.email}
+                        </div>
+                        <div>
+                          <strong>Phone:</strong> {application.phone}
+                        </div>
+                        <div>
+                          <strong>Nationality:</strong> {application.nationality}
+                        </div>
+                        <div>
+                          <strong>Passport Number:</strong> {application.passport_number}
+                        </div>
+                        <div>
+                          <strong>Visa Type:</strong> {application.visa_type}
+                        </div>
+                        <div>
+                          <strong>Destination City:</strong> {application.destination_city}
+                        </div>
+                        <div>
+                          <strong>Travel Date:</strong> {application.travel_date}
+                        </div>
+                      </div>
                     </div>
 
-                    <select
-                      value={application.status}
-                      onChange={(e) =>
-                        handleStatusChange(application.id, e.target.value)
-                      }
-                      style={statusSelectStyle}
+                    <div style={badgeStyle(application.status)}>
+                      {application.status}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gap: "10px", color: "#475569" }}>
+                    <div>
+                      <strong style={{ color: "#111827" }}>Purpose of Visit:</strong>{" "}
+                      {application.purpose_of_visit}
+                    </div>
+
+                    {application.host_or_company && (
+                      <div>
+                        <strong style={{ color: "#111827" }}>Host or Company:</strong>{" "}
+                        {application.host_or_company}
+                      </div>
+                    )}
+
+                    {application.school_name && (
+                      <div>
+                        <strong style={{ color: "#111827" }}>School Name:</strong>{" "}
+                        {application.school_name}
+                      </div>
+                    )}
+
+                    {application.accommodation_details && (
+                      <div>
+                        <strong style={{ color: "#111827" }}>Accommodation Details:</strong>{" "}
+                        {application.accommodation_details}
+                      </div>
+                    )}
+
+                    {application.extra_notes && (
+                      <div>
+                        <strong style={{ color: "#111827" }}>Extra Notes:</strong>{" "}
+                        {application.extra_notes}
+                      </div>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      flexWrap: "wrap",
+                      marginTop: "18px",
+                    }}
+                  >
+                    <button
+                      style={actionButtonStyle}
+                      onClick={() => handleStatusUpdate(application.id, "pending")}
+                      disabled={updatingId === application.id}
                     >
-                      <option value="pending">pending</option>
-                      <option value="reviewing">reviewing</option>
-                      <option value="approved">approved</option>
-                      <option value="rejected">rejected</option>
-                      <option value="completed">completed</option>
-                    </select>
+                      {updatingId === application.id ? "Updating..." : "Mark Pending"}
+                    </button>
+
+                    <button
+                      style={{
+                        ...actionButtonStyle,
+                        background: "#dcfce7",
+                        border: "1px solid #86efac",
+                        color: "#166534",
+                      }}
+                      onClick={() => handleStatusUpdate(application.id, "approved")}
+                      disabled={updatingId === application.id}
+                    >
+                      {updatingId === application.id ? "Updating..." : "Approve"}
+                    </button>
+
+                    <button
+                      style={{
+                        ...actionButtonStyle,
+                        background: "#fee2e2",
+                        border: "1px solid #fca5a5",
+                        color: "#991b1b",
+                      }}
+                      onClick={() => handleStatusUpdate(application.id, "rejected")}
+                      disabled={updatingId === application.id}
+                    >
+                      {updatingId === application.id ? "Updating..." : "Reject"}
+                    </button>
                   </div>
-
-                  <h3 style={{ margin: "0 0 10px 0", fontSize: "22px" }}>
-                    {application.full_name}
-                  </h3>
-
-                  <div style={detailsGridStyle}>
-                    <p><strong>Email:</strong> {application.email}</p>
-                    <p><strong>Phone:</strong> {application.phone}</p>
-                    <p><strong>Nationality:</strong> {application.nationality}</p>
-                    <p><strong>Passport:</strong> {application.passport_number}</p>
-                    <p><strong>Travel Date:</strong> {application.travel_date}</p>
-                  </div>
-
-                  <p style={paragraphStyle}>
-                    <strong>Purpose:</strong> {application.purpose_of_visit}
-                  </p>
-
-                  {application.host_or_company && (
-                    <p style={paragraphStyle}>
-                      <strong>Host / Company:</strong> {application.host_or_company}
-                    </p>
-                  )}
-
-                  {application.school_name && (
-                    <p style={paragraphStyle}>
-                      <strong>School:</strong> {application.school_name}
-                    </p>
-                  )}
-
-                  {application.accommodation_details && (
-                    <p style={paragraphStyle}>
-                      <strong>Accommodation:</strong> {application.accommodation_details}
-                    </p>
-                  )}
-
-                  {application.extra_notes && (
-                    <p style={paragraphStyle}>
-                      <strong>Extra Notes:</strong> {application.extra_notes}
-                    </p>
-                  )}
                 </div>
               ))}
             </div>
@@ -203,180 +415,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-function getStatusBadgeStyle(status: string): React.CSSProperties {
-  const normalized = status.toLowerCase();
-
-  if (normalized === "approved") {
-    return {
-      background: "#dcfce7",
-      color: "#166534",
-      padding: "6px 12px",
-      borderRadius: "999px",
-      fontSize: "14px",
-      fontWeight: 700,
-      textTransform: "capitalize",
-    };
-  }
-
-  if (normalized === "reviewing") {
-    return {
-      background: "#fef3c7",
-      color: "#92400e",
-      padding: "6px 12px",
-      borderRadius: "999px",
-      fontSize: "14px",
-      fontWeight: 700,
-      textTransform: "capitalize",
-    };
-  }
-
-  if (normalized === "rejected") {
-    return {
-      background: "#fee2e2",
-      color: "#991b1b",
-      padding: "6px 12px",
-      borderRadius: "999px",
-      fontSize: "14px",
-      fontWeight: 700,
-      textTransform: "capitalize",
-    };
-  }
-
-  if (normalized === "completed") {
-    return {
-      background: "#dbeafe",
-      color: "#1d4ed8",
-      padding: "6px 12px",
-      borderRadius: "999px",
-      fontSize: "14px",
-      fontWeight: 700,
-      textTransform: "capitalize",
-    };
-  }
-
-  return {
-    background: "#e5e7eb",
-    color: "#374151",
-    padding: "6px 12px",
-    borderRadius: "999px",
-    fontSize: "14px",
-    fontWeight: 700,
-    textTransform: "capitalize",
-  };
-}
-
-const pageWrapperStyle: React.CSSProperties = {
-  padding: "32px 20px 48px",
-};
-
-const pageInnerStyle: React.CSSProperties = {
-  maxWidth: "1100px",
-  margin: "0 auto",
-};
-
-const heroCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "18px",
-  padding: "28px",
-  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
-  marginBottom: "28px",
-};
-
-const statsGridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: "18px",
-  marginBottom: "28px",
-};
-
-const statCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "16px",
-  padding: "22px",
-  boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
-  border: "1px solid #e5e7eb",
-};
-
-const statLabelStyle: React.CSSProperties = {
-  margin: "0 0 10px 0",
-  color: "#6b7280",
-  fontSize: "14px",
-  fontWeight: 600,
-};
-
-const statValueStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: "32px",
-};
-
-const sectionCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "18px",
-  padding: "24px",
-  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
-  marginBottom: "28px",
-};
-
-const sectionTitleStyle: React.CSSProperties = {
-  marginTop: 0,
-  marginBottom: "18px",
-  fontSize: "26px",
-};
-
-const emptyTextStyle: React.CSSProperties = {
-  color: "#6b7280",
-  margin: 0,
-};
-
-const itemCardStyle: React.CSSProperties = {
-  background: "#f9fafb",
-  border: "1px solid #e5e7eb",
-  borderRadius: "14px",
-  padding: "18px",
-};
-
-const badgeRowStyle: React.CSSProperties = {
-  display: "flex",
-  gap: "10px",
-  flexWrap: "wrap",
-};
-
-const primaryBadgeStyle: React.CSSProperties = {
-  background: "#eef2ff",
-  color: "#3730a3",
-  padding: "6px 12px",
-  borderRadius: "999px",
-  fontSize: "14px",
-  fontWeight: 600,
-};
-
-const secondaryBadgeStyle: React.CSSProperties = {
-  background: "#ecfeff",
-  color: "#155e75",
-  padding: "6px 12px",
-  borderRadius: "999px",
-  fontSize: "14px",
-  fontWeight: 600,
-};
-
-const statusSelectStyle: React.CSSProperties = {
-  padding: "10px 12px",
-  borderRadius: "10px",
-  border: "1px solid #d1d5db",
-  fontSize: "14px",
-  background: "#fff",
-};
-
-const detailsGridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: "8px 16px",
-  marginBottom: "12px",
-};
-
-const paragraphStyle: React.CSSProperties = {
-  margin: "8px 0 0 0",
-  color: "#4b5563",
-  lineHeight: 1.7,
-};
