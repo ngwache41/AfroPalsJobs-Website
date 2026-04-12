@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import JobsPage from "./pages/JobsPage";
 import VisaApplicationPage from "./pages/VisaApplicationPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +26,10 @@ export const router = createBrowserRouter([
       {
         path: "admin",
         Component: AdminDashboardPage,
+      },
+      {
+        path: "admin-login",
+        Component: AdminLoginPage,
       },
     ],
   },

@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
+  clearAdminToken,
   getJobs,
   getVisaApplications,
+  isAdminLoggedIn,
   updateVisaApplicationStatus,
   Job,
   VisaApplication,
@@ -35,6 +38,24 @@ const statCardStyle: React.CSSProperties = {
   borderRadius: "20px",
   padding: "24px",
   boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
+  border: "1px solid #e5e7eb",
+};
+
+const actionButtonStyle: React.CSSProperties = {
+  border: "1px solid #d1d5db",
+  background: "#ffffff",
+  color: "#111827",
+  borderRadius: "10px",
+  padding: "10px 14px",
+  cursor: "pointer",
+  fontWeight: 600,
+};
+
+const authCardStyle: React.CSSProperties = {
+  background: "#ffffff",
+  borderRadius: "24px",
+  padding: "36px",
+  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
   border: "1px solid #e5e7eb",
 };
 
@@ -76,22 +97,21 @@ const badgeStyle = (status: string): React.CSSProperties => {
   };
 };
 
-const actionButtonStyle: React.CSSProperties = {
-  border: "1px solid #d1d5db",
-  background: "#ffffff",
-  color: "#111827",
-  borderRadius: "10px",
-  padding: "10px 14px",
-  cursor: "pointer",
-  fontWeight: 600,
-};
-
 export default function AdminDashboardPage() {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [visaApplications, setVisaApplications] = useState<VisaApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isAdminLoggedIn()) {
+      setLoading(false);
+      return;
+    }
+    loadDashboardData();
+  }, []);
 
   async function loadDashboardData() {
     try {
@@ -113,10 +133,6 @@ export default function AdminDashboardPage() {
     }
   }
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
   async function handleStatusUpdate(applicationId: number, status: string) {
     try {
       setUpdatingId(applicationId);
@@ -130,24 +146,85 @@ export default function AdminDashboardPage() {
     }
   }
 
+  function handleLogout() {
+    clearAdminToken();
+    navigate("/admin-login");
+  }
+
+  if (!isAdminLoggedIn()) {
+    return (
+      <div style={pageWrapStyle}>
+        <div style={authCardStyle}>
+          <h1 style={{ marginTop: 0, marginBottom: "12px", fontSize: "38px" }}>
+            Admin Access Required
+          </h1>
+          <p style={{ color: "#475569", lineHeight: 1.7, marginTop: 0 }}>
+            Please sign in to access the admin dashboard.
+          </p>
+          <Link
+            to="/admin-login"
+            style={{
+              display: "inline-block",
+              background: "#111827",
+              color: "#ffffff",
+              textDecoration: "none",
+              padding: "14px 20px",
+              borderRadius: "12px",
+              fontWeight: 700,
+            }}
+          >
+            Go to Admin Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={pageWrapStyle}>
       <section style={heroCardStyle}>
-        <h1 style={{ margin: "0 0 12px 0", fontSize: "42px", color: "#0f172a" }}>
-          Admin Dashboard
-        </h1>
-        <p
+        <div
           style={{
-            margin: 0,
-            color: "#475569",
-            fontSize: "18px",
-            lineHeight: 1.7,
-            maxWidth: "860px",
+            display: "flex",
+            justifyContent: "space-between",
+            gap: "16px",
+            flexWrap: "wrap",
+            alignItems: "center",
           }}
         >
-          Review submitted jobs and visa applications from the website in one
-          organized control panel.
-        </p>
+          <div>
+            <h1 style={{ margin: "0 0 12px 0", fontSize: "42px", color: "#0f172a" }}>
+              Admin Dashboard
+            </h1>
+            <p
+              style={{
+                margin: 0,
+                color: "#475569",
+                fontSize: "18px",
+                lineHeight: 1.7,
+                maxWidth: "860px",
+              }}
+            >
+              Review submitted jobs and visa applications from the website in one
+              organized control panel.
+            </p>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "#111827",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "12px",
+              padding: "14px 18px",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Logout
+          </button>
+        </div>
       </section>
 
       {errorMessage && (
@@ -192,13 +269,7 @@ export default function AdminDashboardPage() {
         </div>
       </section>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: "24px",
-        }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "24px" }}>
         <section style={sectionCardStyle}>
           <h2 style={{ marginTop: 0, marginBottom: "10px", fontSize: "30px" }}>
             Jobs

@@ -1,4 +1,5 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { clearAdminToken, isAdminLoggedIn } from "./lib/api";
 
 function getLinkStyle(active: boolean): React.CSSProperties {
   return {
@@ -31,11 +32,19 @@ function getAnchorStyle(): React.CSSProperties {
 
 export default function App() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const loggedIn = isAdminLoggedIn();
 
   const isHome = location.pathname === "/";
   const isJobs = location.pathname === "/jobs";
   const isVisa = location.pathname === "/visa";
   const isAdmin = location.pathname === "/admin";
+  const isAdminLogin = location.pathname === "/admin-login";
+
+  function handleLogout() {
+    clearAdminToken();
+    navigate("/admin-login");
+  }
 
   return (
     <div
@@ -120,9 +129,27 @@ export default function App() {
               Visa & Invitations
             </Link>
 
-            <Link to="/admin" style={getLinkStyle(isAdmin)}>
-              Admin Dashboard
-            </Link>
+            {loggedIn ? (
+              <>
+                <Link to="/admin" style={getLinkStyle(isAdmin)}>
+                  Admin Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    ...getLinkStyle(false),
+                    cursor: "pointer",
+                    border: "1px solid #374151",
+                  }}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link to="/admin-login" style={getLinkStyle(isAdminLogin)}>
+                Admin Login
+              </Link>
+            )}
 
             {isHome && (
               <>
@@ -215,10 +242,10 @@ export default function App() {
                 Visa & Invitations
               </Link>
               <Link
-                to="/admin"
+                to="/admin-login"
                 style={{ color: "#cbd5e1", textDecoration: "none" }}
               >
-                Admin Dashboard
+                Admin Login
               </Link>
             </div>
           </div>

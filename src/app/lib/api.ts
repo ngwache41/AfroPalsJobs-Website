@@ -1,8 +1,6 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  "https://afropals-backend.onrender.com"; // fallback for production
-
-// ===== TYPES =====
+  "https://afropals-backend.onrender.com";
 
 export type Job = {
   id: number;
@@ -46,7 +44,58 @@ export type VisaApplicationCreate = {
   extra_notes?: string;
 };
 
-// ===== JOBS =====
+export type AdminLoginResponse = {
+  access_token: string;
+  token_type: string;
+};
+
+function getAdminToken(): string | null {
+  return localStorage.getItem("admin_token");
+}
+
+export function saveAdminToken(token: string) {
+  localStorage.setItem("admin_token", token);
+}
+
+export function clearAdminToken() {
+  localStorage.removeItem("admin_token");
+}
+
+export function isAdminLoggedIn(): boolean {
+  return Boolean(getAdminToken());
+}
+
+function getAuthHeaders(): HeadersInit {
+  const token = getAdminToken();
+  return token
+    ? {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      }
+    : {
+        "Content-Type": "application/json",
+      };
+}
+
+export async function adminLogin(
+  username: string,
+  password: string
+): Promise<AdminLoginResponse> {
+  const response = await fetch(`${API_BASE_URL}/admin/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to login: ${response.status} - ${text}`);
+  }
+
+  return response.json();
+}
 
 export async function getJobs(): Promise<Job[]> {
   const response = await fetch(`${API_BASE_URL}/jobs`);
@@ -76,8 +125,6 @@ export async function createJob(payload: Omit<Job, "id">): Promise<Job> {
   return response.json();
 }
 
-// ===== VISA APPLICATIONS =====
-
 export async function createVisaApplication(
   payload: VisaApplicationCreate
 ): Promise<VisaApplication> {
@@ -100,7 +147,9 @@ export async function createVisaApplication(
 }
 
 export async function getVisaApplications(): Promise<VisaApplication[]> {
-  const response = await fetch(`${API_BASE_URL}/visa-applications`);
+  const response = await fetch(`${API_BASE_URL}/visa-applications`, {
+    headers: getAuthHeaders(),
+  });
 
   if (!response.ok) {
     const text = await response.text();
@@ -120,9 +169,7 @@ export async function updateVisaApplicationStatus(
     `${API_BASE_URL}/visa-applications/${applicationId}/status`,
     {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ status }),
     }
   );
