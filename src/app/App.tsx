@@ -1,14 +1,15 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { clearAdminToken, isAdminLoggedIn } from "./lib/api";
+import { colors, radii, shadows } from "./theme";
 
 function getLinkStyle(active: boolean): React.CSSProperties {
   return {
     padding: "10px 18px",
-    borderRadius: "999px",
+    borderRadius: radii.pill,
     border: active ? "1px solid #ffffff" : "1px solid #374151",
     textDecoration: "none",
     background: active ? "#ffffff" : "transparent",
-    color: active ? "#111827" : "#ffffff",
+    color: active ? colors.text : "#ffffff",
     fontWeight: 600,
     fontSize: "15px",
     lineHeight: 1,
@@ -50,8 +51,8 @@ export default function App() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#f5f7fb",
-        color: "#111827",
+        background: colors.bg,
+        color: colors.text,
         fontFamily: "Inter, Arial, Helvetica, sans-serif",
       }}
     >
@@ -61,7 +62,7 @@ export default function App() {
             "linear-gradient(135deg, #0f172a 0%, #111827 60%, #1f2937 100%)",
           color: "#ffffff",
           padding: "18px 24px",
-          boxShadow: "0 6px 24px rgba(0,0,0,0.12)",
+          boxShadow: shadows.sm,
           position: "sticky",
           top: 0,
           zIndex: 30,
