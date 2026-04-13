@@ -1,56 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { createJob, getJobs, Job } from "../lib/api";
-
-const pageWrapStyle: React.CSSProperties = {
-  maxWidth: "1200px",
-  margin: "0 auto",
-  padding: "48px 24px",
-};
-
-const heroCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "24px",
-  padding: "36px",
-  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-  border: "1px solid #e5e7eb",
-  marginBottom: "28px",
-};
-
-const sectionCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "22px",
-  padding: "28px",
-  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
-  border: "1px solid #e5e7eb",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "14px 16px",
-  borderRadius: "12px",
-  border: "1px solid #d1d5db",
-  fontSize: "15px",
-  outline: "none",
-  boxSizing: "border-box",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontWeight: 600,
-  marginBottom: "8px",
-  color: "#111827",
-};
-
-const buttonStyle: React.CSSProperties = {
-  background: "#111827",
-  color: "#ffffff",
-  border: "none",
-  borderRadius: "12px",
-  padding: "14px 20px",
-  fontWeight: 700,
-  fontSize: "15px",
-  cursor: "pointer",
-};
+import { typography, ui } from "../theme";
 
 type JobFormState = {
   title: string;
@@ -115,17 +65,15 @@ export default function JobsPage() {
   }
 
   return (
-    <div style={pageWrapStyle}>
-      <section style={heroCardStyle}>
-        <h1 style={{ margin: "0 0 12px 0", fontSize: "42px", color: "#0f172a" }}>
+    <div style={ui.pageWrap}>
+      <section style={ui.heroCard}>
+        <h1 style={{ ...typography.pageTitle, margin: "0 0 12px 0", color: "#0f172a" }}>
           AfroPals Jobs
         </h1>
         <p
           style={{
+            ...typography.bodyLg,
             margin: 0,
-            color: "#475569",
-            fontSize: "18px",
-            lineHeight: 1.7,
             maxWidth: "800px",
           }}
         >
@@ -141,19 +89,19 @@ export default function JobsPage() {
           gap: "24px",
         }}
       >
-        <section style={sectionCardStyle}>
-          <h2 style={{ marginTop: 0, marginBottom: "10px", fontSize: "32px" }}>
+        <section style={ui.sectionCard}>
+          <h2 style={{ ...typography.sectionTitle, marginTop: 0, marginBottom: "10px" }}>
             Post a Job
           </h2>
-          <p style={{ marginTop: 0, color: "#475569", lineHeight: 1.7 }}>
+          <p style={{ ...typography.body, marginTop: 0 }}>
             Submit a new job opportunity for candidates on AfroPals Jobs.
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "grid", gap: "18px" }}>
             <div>
-              <label style={labelStyle}>Job Title</label>
+              <label style={ui.label}>Job Title</label>
               <input
-                style={inputStyle}
+                style={ui.input}
                 value={form.title}
                 onChange={(e) => updateField("title", e.target.value)}
                 placeholder="Frontend Developer"
@@ -162,9 +110,9 @@ export default function JobsPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Company Name</label>
+              <label style={ui.label}>Company Name</label>
               <input
-                style={inputStyle}
+                style={ui.input}
                 value={form.company}
                 onChange={(e) => updateField("company", e.target.value)}
                 placeholder="AfroPals Jobs"
@@ -173,9 +121,9 @@ export default function JobsPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Location</label>
+              <label style={ui.label}>Location</label>
               <input
-                style={inputStyle}
+                style={ui.input}
                 value={form.location}
                 onChange={(e) => updateField("location", e.target.value)}
                 placeholder="Moscow, Russia"
@@ -184,9 +132,9 @@ export default function JobsPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Job Description</label>
+              <label style={ui.label}>Job Description</label>
               <textarea
-                style={{ ...inputStyle, minHeight: "140px", resize: "vertical" }}
+                style={{ ...ui.input, minHeight: "140px", resize: "vertical" }}
                 value={form.description}
                 onChange={(e) => updateField("description", e.target.value)}
                 placeholder="Describe the job opportunity..."
@@ -194,7 +142,7 @@ export default function JobsPage() {
               />
             </div>
 
-            <button type="submit" style={buttonStyle} disabled={submitting}>
+            <button type="submit" style={ui.primaryButton} disabled={submitting}>
               {submitting ? "Submitting..." : "Submit Job"}
             </button>
 
@@ -228,41 +176,29 @@ export default function JobsPage() {
           </form>
         </section>
 
-        <section style={sectionCardStyle}>
-          <h2 style={{ marginTop: 0, marginBottom: "10px", fontSize: "32px" }}>
+        <section style={ui.sectionCard}>
+          <h2 style={{ ...typography.sectionTitle, marginTop: 0, marginBottom: "10px" }}>
             Available Jobs
           </h2>
-          <p style={{ marginTop: 0, color: "#475569", lineHeight: 1.7 }}>
+          <p style={{ ...typography.body, marginTop: 0 }}>
             Browse current job opportunities published on the platform.
           </p>
 
           {loading ? (
-            <p style={{ color: "#475569" }}>Loading jobs...</p>
+            <p style={typography.body}>Loading jobs...</p>
           ) : jobs.length === 0 ? (
-            <div
-              style={{
-                background: "#f8fafc",
-                border: "1px solid #e5e7eb",
-                borderRadius: "16px",
-                padding: "18px",
-                color: "#475569",
-              }}
-            >
-              No jobs found.
-            </div>
+            <div style={ui.softCard}>No jobs found.</div>
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
               {jobs.map((job) => (
                 <div
                   key={job.id}
                   style={{
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "18px",
+                    ...ui.softCard,
                     padding: "20px",
-                    background: "#f8fafc",
                   }}
                 >
-                  <h3 style={{ margin: "0 0 10px 0", fontSize: "24px" }}>
+                  <h3 style={{ ...typography.cardTitle, margin: "0 0 10px 0" }}>
                     {job.title}
                   </h3>
                   <p style={{ margin: "0 0 8px 0" }}>
@@ -271,9 +207,7 @@ export default function JobsPage() {
                   <p style={{ margin: "0 0 12px 0" }}>
                     <strong>Location:</strong> {job.location}
                   </p>
-                  <p style={{ margin: 0, color: "#475569", lineHeight: 1.7 }}>
-                    {job.description}
-                  </p>
+                  <p style={{ ...typography.body, margin: 0 }}>{job.description}</p>
                 </div>
               ))}
             </div>

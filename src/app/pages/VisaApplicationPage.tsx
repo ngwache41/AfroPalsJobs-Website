@@ -1,56 +1,6 @@
 import { FormEvent, useState } from "react";
 import { createVisaApplication } from "../lib/api";
-
-const pageWrapStyle: React.CSSProperties = {
-  maxWidth: "1200px",
-  margin: "0 auto",
-  padding: "48px 24px",
-};
-
-const heroCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "24px",
-  padding: "36px",
-  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-  border: "1px solid #e5e7eb",
-  marginBottom: "28px",
-};
-
-const sectionCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "22px",
-  padding: "28px",
-  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
-  border: "1px solid #e5e7eb",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "14px 16px",
-  borderRadius: "12px",
-  border: "1px solid #d1d5db",
-  fontSize: "15px",
-  outline: "none",
-  boxSizing: "border-box",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontWeight: 600,
-  marginBottom: "8px",
-  color: "#111827",
-};
-
-const buttonStyle: React.CSSProperties = {
-  background: "#111827",
-  color: "#ffffff",
-  border: "none",
-  borderRadius: "12px",
-  padding: "14px 20px",
-  fontWeight: 700,
-  fontSize: "15px",
-  cursor: "pointer",
-};
+import { typography, ui } from "../theme";
 
 type VisaFormState = {
   full_name: string;
@@ -113,17 +63,15 @@ export default function VisaApplicationPage() {
   }
 
   return (
-    <div style={pageWrapStyle}>
-      <section style={heroCardStyle}>
-        <h1 style={{ margin: "0 0 12px 0", fontSize: "42px", color: "#0f172a" }}>
+    <div style={ui.pageWrap}>
+      <section style={ui.heroCard}>
+        <h1 style={{ ...typography.pageTitle, margin: "0 0 12px 0", color: "#0f172a" }}>
           Visa & Invitation Support
         </h1>
         <p
           style={{
+            ...typography.bodyLg,
             margin: 0,
-            color: "#475569",
-            fontSize: "18px",
-            lineHeight: 1.7,
             maxWidth: "860px",
           }}
         >
@@ -132,11 +80,11 @@ export default function VisaApplicationPage() {
         </p>
       </section>
 
-      <section style={sectionCardStyle}>
-        <h2 style={{ marginTop: 0, marginBottom: "10px", fontSize: "32px" }}>
+      <section style={ui.sectionCard}>
+        <h2 style={{ ...typography.sectionTitle, marginTop: 0, marginBottom: "10px" }}>
           Application Form
         </h2>
-        <p style={{ marginTop: 0, color: "#475569", lineHeight: 1.7 }}>
+        <p style={{ ...typography.body, marginTop: 0 }}>
           Please complete the form carefully so your request can be reviewed
           properly.
         </p>
@@ -150,9 +98,9 @@ export default function VisaApplicationPage() {
           }}
         >
           <div>
-            <label style={labelStyle}>Full Name</label>
+            <label style={ui.label}>Full Name</label>
             <input
-              style={inputStyle}
+              style={ui.input}
               value={form.full_name}
               onChange={(e) => updateField("full_name", e.target.value)}
               required
@@ -160,9 +108,9 @@ export default function VisaApplicationPage() {
           </div>
 
           <div>
-            <label style={labelStyle}>Email</label>
+            <label style={ui.label}>Email</label>
             <input
-              style={inputStyle}
+              style={ui.input}
               type="email"
               value={form.email}
               onChange={(e) => updateField("email", e.target.value)}
@@ -171,9 +119,9 @@ export default function VisaApplicationPage() {
           </div>
 
           <div>
-            <label style={labelStyle}>Phone</label>
+            <label style={ui.label}>Phone</label>
             <input
-              style={inputStyle}
+              style={ui.input}
               value={form.phone}
               onChange={(e) => updateField("phone", e.target.value)}
               required
@@ -181,9 +129,9 @@ export default function VisaApplicationPage() {
           </div>
 
           <div>
-            <label style={labelStyle}>Nationality</label>
+            <label style={ui.label}>Nationality</label>
             <input
-              style={inputStyle}
+              style={ui.input}
               value={form.nationality}
               onChange={(e) => updateField("nationality", e.target.value)}
               required
@@ -191,9 +139,9 @@ export default function VisaApplicationPage() {
           </div>
 
           <div>
-            <label style={labelStyle}>Passport Number</label>
+            <label style={ui.label}>Passport Number</label>
             <input
-              style={inputStyle}
+              style={ui.input}
               value={form.passport_number}
               onChange={(e) => updateField("passport_number", e.target.value)}
               required
@@ -201,9 +149,9 @@ export default function VisaApplicationPage() {
           </div>
 
           <div>
-            <label style={labelStyle}>Visa Type</label>
+            <label style={ui.label}>Visa Type</label>
             <select
-              style={inputStyle}
+              style={ui.input}
               value={form.visa_type}
               onChange={(e) => updateField("visa_type", e.target.value)}
               required
@@ -218,9 +166,9 @@ export default function VisaApplicationPage() {
           </div>
 
           <div>
-            <label style={labelStyle}>Destination City</label>
+            <label style={ui.label}>Destination City</label>
             <input
-              style={inputStyle}
+              style={ui.input}
               value={form.destination_city}
               onChange={(e) => updateField("destination_city", e.target.value)}
               required
@@ -228,9 +176,9 @@ export default function VisaApplicationPage() {
           </div>
 
           <div>
-            <label style={labelStyle}>Travel Date</label>
+            <label style={ui.label}>Travel Date</label>
             <input
-              style={inputStyle}
+              style={ui.input}
               type="date"
               value={form.travel_date}
               onChange={(e) => updateField("travel_date", e.target.value)}
@@ -239,9 +187,9 @@ export default function VisaApplicationPage() {
           </div>
 
           <div style={{ gridColumn: "1 / -1" }}>
-            <label style={labelStyle}>Purpose of Visit</label>
+            <label style={ui.label}>Purpose of Visit</label>
             <textarea
-              style={{ ...inputStyle, minHeight: "110px", resize: "vertical" }}
+              style={{ ...ui.input, minHeight: "110px", resize: "vertical" }}
               value={form.purpose_of_visit}
               onChange={(e) => updateField("purpose_of_visit", e.target.value)}
               required
@@ -249,43 +197,43 @@ export default function VisaApplicationPage() {
           </div>
 
           <div>
-            <label style={labelStyle}>Host or Company</label>
+            <label style={ui.label}>Host or Company</label>
             <input
-              style={inputStyle}
+              style={ui.input}
               value={form.host_or_company}
               onChange={(e) => updateField("host_or_company", e.target.value)}
             />
           </div>
 
           <div>
-            <label style={labelStyle}>School Name</label>
+            <label style={ui.label}>School Name</label>
             <input
-              style={inputStyle}
+              style={ui.input}
               value={form.school_name}
               onChange={(e) => updateField("school_name", e.target.value)}
             />
           </div>
 
           <div style={{ gridColumn: "1 / -1" }}>
-            <label style={labelStyle}>Accommodation Details</label>
+            <label style={ui.label}>Accommodation Details</label>
             <textarea
-              style={{ ...inputStyle, minHeight: "100px", resize: "vertical" }}
+              style={{ ...ui.input, minHeight: "100px", resize: "vertical" }}
               value={form.accommodation_details}
               onChange={(e) => updateField("accommodation_details", e.target.value)}
             />
           </div>
 
           <div style={{ gridColumn: "1 / -1" }}>
-            <label style={labelStyle}>Extra Notes</label>
+            <label style={ui.label}>Extra Notes</label>
             <textarea
-              style={{ ...inputStyle, minHeight: "100px", resize: "vertical" }}
+              style={{ ...ui.input, minHeight: "100px", resize: "vertical" }}
               value={form.extra_notes}
               onChange={(e) => updateField("extra_notes", e.target.value)}
             />
           </div>
 
           <div style={{ gridColumn: "1 / -1" }}>
-            <button type="submit" style={buttonStyle} disabled={submitting}>
+            <button type="submit" style={ui.primaryButton} disabled={submitting}>
               {submitting ? "Submitting..." : "Submit Application"}
             </button>
           </div>

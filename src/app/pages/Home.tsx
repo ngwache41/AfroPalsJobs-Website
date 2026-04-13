@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { colors, typography, ui } from "../theme";
 
 function sectionStyle(): React.CSSProperties {
   return {
@@ -10,11 +11,8 @@ function sectionStyle(): React.CSSProperties {
 
 function cardStyle(): React.CSSProperties {
   return {
-    background: "#fff",
-    borderRadius: "20px",
+    ...ui.sectionCard,
     padding: "28px",
-    boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-    border: "1px solid #e5e7eb",
   };
 }
 
@@ -23,8 +21,7 @@ export default function Home() {
     <div>
       <section
         style={{
-          background:
-            "linear-gradient(180deg, #eef2ff 0%, #f8fafc 45%, #f5f7fb 100%)",
+          background: `linear-gradient(180deg, ${colors.bgSoft} 0%, #f8fafc 45%, ${colors.bg} 100%)`,
         }}
       >
         <div
@@ -42,8 +39,8 @@ export default function Home() {
                 display: "inline-block",
                 padding: "8px 14px",
                 borderRadius: "999px",
-                background: "#e0e7ff",
-                color: "#3730a3",
+                background: colors.accentSoft,
+                color: colors.accent,
                 fontWeight: 700,
                 fontSize: "13px",
                 marginBottom: "18px",
@@ -54,9 +51,8 @@ export default function Home() {
 
             <h1
               style={{
+                ...typography.heroTitle,
                 margin: "0 0 18px 0",
-                fontSize: "48px",
-                lineHeight: 1.1,
                 color: "#0f172a",
               }}
             >
@@ -65,10 +61,8 @@ export default function Home() {
 
             <p
               style={{
+                ...typography.bodyLg,
                 margin: "0 0 28px 0",
-                fontSize: "18px",
-                lineHeight: 1.7,
-                color: "#475569",
                 maxWidth: "720px",
               }}
             >
@@ -87,8 +81,8 @@ export default function Home() {
               <Link
                 to="/jobs"
                 style={{
-                  background: "#111827",
-                  color: "#fff",
+                  background: colors.primary,
+                  color: colors.primaryText,
                   textDecoration: "none",
                   padding: "14px 22px",
                   borderRadius: "12px",
@@ -101,13 +95,13 @@ export default function Home() {
               <Link
                 to="/visa"
                 style={{
-                  background: "#fff",
-                  color: "#111827",
+                  background: colors.surface,
+                  color: colors.text,
                   textDecoration: "none",
                   padding: "14px 22px",
                   borderRadius: "12px",
                   fontWeight: 700,
-                  border: "1px solid #d1d5db",
+                  border: `1px solid ${colors.borderStrong}`,
                 }}
               >
                 Apply for Visa Support
@@ -116,7 +110,9 @@ export default function Home() {
           </div>
 
           <div style={cardStyle()}>
-            <h3 style={{ marginTop: 0, fontSize: "24px" }}>Why candidates trust us</h3>
+            <h3 style={{ ...typography.cardTitle, marginTop: 0 }}>
+              Why candidates trust us
+            </h3>
             <div
               style={{
                 display: "grid",
@@ -125,7 +121,7 @@ export default function Home() {
             >
               <div>
                 <strong>Verified opportunities</strong>
-                <p style={{ margin: "8px 0 0 0", color: "#475569", lineHeight: 1.6 }}>
+                <p style={{ ...typography.body, margin: "8px 0 0 0" }}>
                   We focus on trusted job listings and practical guidance for
                   international applicants.
                 </p>
@@ -133,7 +129,7 @@ export default function Home() {
 
               <div>
                 <strong>Visa and invitation support</strong>
-                <p style={{ margin: "8px 0 0 0", color: "#475569", lineHeight: 1.6 }}>
+                <p style={{ ...typography.body, margin: "8px 0 0 0" }}>
                   We help users understand which path fits their purpose of
                   travel, work, study, business, or private visits.
                 </p>
@@ -141,7 +137,7 @@ export default function Home() {
 
               <div>
                 <strong>Simple application flow</strong>
-                <p style={{ margin: "8px 0 0 0", color: "#475569", lineHeight: 1.6 }}>
+                <p style={{ ...typography.body, margin: "8px 0 0 0" }}>
                   Our platform allows candidates to submit details online and be
                   reviewed through an admin dashboard.
                 </p>
@@ -153,8 +149,8 @@ export default function Home() {
 
       <section id="services" style={sectionStyle()}>
         <div style={{ textAlign: "center", marginBottom: "36px" }}>
-          <h2 style={{ margin: 0, fontSize: "36px" }}>Our Services</h2>
-          <p style={{ color: "#475569", marginTop: "14px", fontSize: "17px" }}>
+          <h2 style={{ ...typography.sectionTitle, margin: 0 }}>Our Services</h2>
+          <p style={{ ...typography.bodyLg, marginTop: "14px" }}>
             Practical support for candidates, employers, and travelers.
           </p>
         </div>
@@ -167,32 +163,40 @@ export default function Home() {
           }}
         >
           <div style={cardStyle()}>
-            <h3 style={{ marginTop: 0 }}>Job Opportunities</h3>
-            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+            <h3 style={{ ...typography.cardTitle, marginTop: 0 }}>
+              Job Opportunities
+            </h3>
+            <p style={typography.body}>
               Browse verified vacancies and submit interest through a cleaner,
               more organized hiring process.
             </p>
           </div>
 
           <div style={cardStyle()}>
-            <h3 style={{ marginTop: 0 }}>Visa Assistance</h3>
-            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+            <h3 style={{ ...typography.cardTitle, marginTop: 0 }}>
+              Visa Assistance
+            </h3>
+            <p style={typography.body}>
               Submit visa application details for work, study, tourist,
               business, and private visit support.
             </p>
           </div>
 
           <div style={cardStyle()}>
-            <h3 style={{ marginTop: 0 }}>Invitation Support</h3>
-            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+            <h3 style={{ ...typography.cardTitle, marginTop: 0 }}>
+              Invitation Support
+            </h3>
+            <p style={typography.body}>
               Request help with invitation-related processes connected to your
               purpose of travel.
             </p>
           </div>
 
           <div style={cardStyle()}>
-            <h3 style={{ marginTop: 0 }}>Application Review</h3>
-            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+            <h3 style={{ ...typography.cardTitle, marginTop: 0 }}>
+              Application Review
+            </h3>
+            <p style={typography.body}>
               Applications submitted through the site are organized for admin
               review and follow-up.
             </p>
@@ -210,21 +214,31 @@ export default function Home() {
           }}
         >
           <div>
-            <h2 style={{ marginTop: 0, fontSize: "34px" }}>About AfroPals Jobs</h2>
-            <p style={{ color: "#475569", lineHeight: 1.8 }}>
+            <h2 style={{ ...typography.sectionTitle, marginTop: 0 }}>
+              About AfroPals Jobs
+            </h2>
+            <p style={typography.body}>
               AfroPals Jobs is built to support international job seekers and
               applicants who need trusted direction for work opportunities,
               invitation support, and visa-related processes in Russia.
             </p>
-            <p style={{ color: "#475569", lineHeight: 1.8 }}>
+            <p style={typography.body}>
               Our goal is to create a more transparent and organized journey
               from first inquiry to final submission.
             </p>
           </div>
 
           <div>
-            <h3 style={{ marginTop: 0 }}>What makes us different</h3>
-            <ul style={{ color: "#475569", lineHeight: 1.9, paddingLeft: "18px" }}>
+            <h3 style={{ ...typography.cardTitle, marginTop: 0 }}>
+              What makes us different
+            </h3>
+            <ul
+              style={{
+                color: colors.textSoft,
+                lineHeight: 1.9,
+                paddingLeft: "18px",
+              }}
+            >
               <li>Clear online application flow</li>
               <li>Centralized jobs and visa support</li>
               <li>Admin review system for better tracking</li>
@@ -236,8 +250,10 @@ export default function Home() {
 
       <section id="faq" style={sectionStyle()}>
         <div style={{ textAlign: "center", marginBottom: "36px" }}>
-          <h2 style={{ margin: 0, fontSize: "36px" }}>Frequently Asked Questions</h2>
-          <p style={{ color: "#475569", marginTop: "14px", fontSize: "17px" }}>
+          <h2 style={{ ...typography.sectionTitle, margin: 0 }}>
+            Frequently Asked Questions
+          </h2>
+          <p style={{ ...typography.bodyLg, marginTop: "14px" }}>
             Answers to common questions from applicants and visitors.
           </p>
         </div>
@@ -249,24 +265,30 @@ export default function Home() {
           }}
         >
           <div style={cardStyle()}>
-            <h3 style={{ marginTop: 0 }}>Can I apply for a job directly from the website?</h3>
-            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+            <h3 style={{ ...typography.cardTitle, marginTop: 0 }}>
+              Can I apply for a job directly from the website?
+            </h3>
+            <p style={typography.body}>
               Yes. The website is designed to help organize opportunities and
               candidate submissions in one place.
             </p>
           </div>
 
           <div style={cardStyle()}>
-            <h3 style={{ marginTop: 0 }}>Can I request visa or invitation support?</h3>
-            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+            <h3 style={{ ...typography.cardTitle, marginTop: 0 }}>
+              Can I request visa or invitation support?
+            </h3>
+            <p style={typography.body}>
               Yes. Use the Visa & Invitations page to submit the relevant
               information for your case.
             </p>
           </div>
 
           <div style={cardStyle()}>
-            <h3 style={{ marginTop: 0 }}>How do you review applications?</h3>
-            <p style={{ color: "#475569", lineHeight: 1.7 }}>
+            <h3 style={{ ...typography.cardTitle, marginTop: 0 }}>
+              How do you review applications?
+            </h3>
+            <p style={typography.body}>
               Submitted entries are collected into the admin dashboard for
               internal review and status management.
             </p>
@@ -281,8 +303,14 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-          <h2 style={{ marginTop: 0, fontSize: "34px" }}>Contact Us</h2>
-          <p style={{ color: "#475569", lineHeight: 1.8, maxWidth: "760px", margin: "0 auto 20px auto" }}>
+          <h2 style={{ ...typography.sectionTitle, marginTop: 0 }}>Contact Us</h2>
+          <p
+            style={{
+              ...typography.body,
+              maxWidth: "760px",
+              margin: "0 auto 20px auto",
+            }}
+          >
             Reach out for general inquiries, job-related questions, and visa or
             invitation support information.
           </p>
@@ -291,7 +319,7 @@ export default function Home() {
             style={{
               display: "grid",
               gap: "10px",
-              color: "#111827",
+              color: colors.text,
               fontSize: "16px",
             }}
           >
