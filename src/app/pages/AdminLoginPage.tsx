@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { adminLogin, saveAdminToken } from "../lib/api";
+import { colors, typography, ui } from "../theme";
 
 const pageWrapStyle: React.CSSProperties = {
   minHeight: "calc(100vh - 180px)",
@@ -8,8 +9,7 @@ const pageWrapStyle: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   padding: "48px 24px",
-  background:
-    "linear-gradient(180deg, #eef2ff 0%, #f8fafc 40%, #f5f7fb 100%)",
+  background: `linear-gradient(180deg, ${colors.bgSoft} 0%, #f8fafc 40%, ${colors.bg} 100%)`,
 };
 
 const containerStyle: React.CSSProperties = {
@@ -34,55 +34,10 @@ const infoCardStyle: React.CSSProperties = {
 };
 
 const loginCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "28px",
+  ...ui.heroCard,
+  marginBottom: 0,
   padding: "36px",
   boxShadow: "0 18px 40px rgba(15, 23, 42, 0.10)",
-  border: "1px solid #e5e7eb",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "14px 16px",
-  borderRadius: "14px",
-  border: "1px solid #d1d5db",
-  fontSize: "15px",
-  outline: "none",
-  boxSizing: "border-box",
-  background: "#ffffff",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontWeight: 700,
-  marginBottom: "8px",
-  color: "#111827",
-  fontSize: "14px",
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  width: "100%",
-  background: "#111827",
-  color: "#ffffff",
-  border: "none",
-  borderRadius: "14px",
-  padding: "14px 18px",
-  fontWeight: 700,
-  fontSize: "15px",
-  cursor: "pointer",
-};
-
-const secondaryLinkStyle: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  textDecoration: "none",
-  color: "#111827",
-  fontWeight: 700,
-  border: "1px solid #d1d5db",
-  borderRadius: "14px",
-  padding: "13px 18px",
-  background: "#ffffff",
 };
 
 export default function AdminLoginPage() {
@@ -131,9 +86,9 @@ export default function AdminLoginPage() {
 
             <h1
               style={{
+                ...typography.pageTitle,
                 margin: "0 0 16px 0",
-                fontSize: "42px",
-                lineHeight: 1.1,
+                color: "#ffffff",
               }}
             >
               Manage jobs and visa applications with confidence
@@ -201,8 +156,8 @@ export default function AdminLoginPage() {
           <div style={{ marginBottom: "24px" }}>
             <h2
               style={{
+                ...typography.sectionTitle,
                 margin: "0 0 10px 0",
-                fontSize: "34px",
                 color: "#0f172a",
               }}
             >
@@ -210,10 +165,8 @@ export default function AdminLoginPage() {
             </h2>
             <p
               style={{
+                ...typography.body,
                 margin: 0,
-                color: "#475569",
-                lineHeight: 1.7,
-                fontSize: "16px",
               }}
             >
               Enter your admin credentials to continue to the dashboard.
@@ -222,9 +175,9 @@ export default function AdminLoginPage() {
 
           <form onSubmit={handleSubmit} style={{ display: "grid", gap: "20px" }}>
             <div>
-              <label style={labelStyle}>Username</label>
+              <label style={ui.label}>Username</label>
               <input
-                style={inputStyle}
+                style={ui.input}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter admin username"
@@ -233,9 +186,9 @@ export default function AdminLoginPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Password</label>
+              <label style={ui.label}>Password</label>
               <input
-                style={inputStyle}
+                style={ui.input}
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -244,7 +197,7 @@ export default function AdminLoginPage() {
               />
             </div>
 
-            <button type="submit" style={primaryButtonStyle} disabled={submitting}>
+            <button type="submit" style={ui.primaryButton} disabled={submitting}>
               {submitting ? "Signing in..." : "Sign In to Dashboard"}
             </button>
 
@@ -271,11 +224,29 @@ export default function AdminLoginPage() {
                 marginTop: "4px",
               }}
             >
-              <Link to="/" style={secondaryLinkStyle}>
+              <Link
+                to="/"
+                style={{
+                  ...ui.secondaryButton,
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 Back to Home
               </Link>
 
-              <Link to="/jobs" style={secondaryLinkStyle}>
+              <Link
+                to="/jobs"
+                style={{
+                  ...ui.secondaryButton,
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 Browse Jobs
               </Link>
             </div>

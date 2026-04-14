@@ -9,92 +9,12 @@ import {
   Job,
   VisaApplication,
 } from "../lib/api";
-
-const pageWrapStyle: React.CSSProperties = {
-  maxWidth: "1200px",
-  margin: "0 auto",
-  padding: "48px 24px",
-};
-
-const heroCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "24px",
-  padding: "36px",
-  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-  border: "1px solid #e5e7eb",
-  marginBottom: "28px",
-};
-
-const sectionCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "22px",
-  padding: "28px",
-  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
-  border: "1px solid #e5e7eb",
-};
-
-const statCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "20px",
-  padding: "24px",
-  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
-  border: "1px solid #e5e7eb",
-};
+import { statusBadge, typography, ui } from "../theme";
 
 const actionButtonStyle: React.CSSProperties = {
-  border: "1px solid #d1d5db",
-  background: "#ffffff",
-  color: "#111827",
-  borderRadius: "10px",
+  ...ui.secondaryButton,
   padding: "10px 14px",
-  cursor: "pointer",
-  fontWeight: 600,
-};
-
-const authCardStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "24px",
-  padding: "36px",
-  boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
-  border: "1px solid #e5e7eb",
-};
-
-const badgeStyle = (status: string): React.CSSProperties => {
-  const normalized = status.toLowerCase();
-
-  if (normalized === "approved") {
-    return {
-      display: "inline-block",
-      padding: "6px 12px",
-      borderRadius: "999px",
-      background: "#dcfce7",
-      color: "#166534",
-      fontWeight: 700,
-      fontSize: "13px",
-    };
-  }
-
-  if (normalized === "rejected") {
-    return {
-      display: "inline-block",
-      padding: "6px 12px",
-      borderRadius: "999px",
-      background: "#fee2e2",
-      color: "#991b1b",
-      fontWeight: 700,
-      fontSize: "13px",
-    };
-  }
-
-  return {
-    display: "inline-block",
-    padding: "6px 12px",
-    borderRadius: "999px",
-    background: "#fef3c7",
-    color: "#92400e",
-    fontWeight: 700,
-    fontSize: "13px",
-  };
+  fontSize: "14px",
 };
 
 export default function AdminDashboardPage() {
@@ -153,24 +73,20 @@ export default function AdminDashboardPage() {
 
   if (!isAdminLoggedIn()) {
     return (
-      <div style={pageWrapStyle}>
-        <div style={authCardStyle}>
-          <h1 style={{ marginTop: 0, marginBottom: "12px", fontSize: "38px" }}>
+      <div style={ui.pageWrap}>
+        <div style={ui.heroCard}>
+          <h1 style={{ ...typography.pageTitle, marginTop: 0, marginBottom: "12px" }}>
             Admin Access Required
           </h1>
-          <p style={{ color: "#475569", lineHeight: 1.7, marginTop: 0 }}>
+          <p style={{ ...typography.body, marginTop: 0 }}>
             Please sign in to access the admin dashboard.
           </p>
           <Link
             to="/admin-login"
             style={{
               display: "inline-block",
-              background: "#111827",
-              color: "#ffffff",
+              ...ui.primaryButton,
               textDecoration: "none",
-              padding: "14px 20px",
-              borderRadius: "12px",
-              fontWeight: 700,
             }}
           >
             Go to Admin Login
@@ -181,8 +97,8 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div style={pageWrapStyle}>
-      <section style={heroCardStyle}>
+    <div style={ui.pageWrap}>
+      <section style={ui.heroCard}>
         <div
           style={{
             display: "flex",
@@ -193,15 +109,13 @@ export default function AdminDashboardPage() {
           }}
         >
           <div>
-            <h1 style={{ margin: "0 0 12px 0", fontSize: "42px", color: "#0f172a" }}>
+            <h1 style={{ ...typography.pageTitle, margin: "0 0 12px 0", color: "#0f172a" }}>
               Admin Dashboard
             </h1>
             <p
               style={{
+                ...typography.bodyLg,
                 margin: 0,
-                color: "#475569",
-                fontSize: "18px",
-                lineHeight: 1.7,
                 maxWidth: "860px",
               }}
             >
@@ -210,18 +124,7 @@ export default function AdminDashboardPage() {
             </p>
           </div>
 
-          <button
-            onClick={handleLogout}
-            style={{
-              background: "#111827",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "12px",
-              padding: "14px 18px",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
+          <button onClick={handleLogout} style={ui.primaryButton}>
             Logout
           </button>
         </div>
@@ -250,8 +153,8 @@ export default function AdminDashboardPage() {
           marginBottom: "28px",
         }}
       >
-        <div style={statCardStyle}>
-          <div style={{ color: "#475569", fontWeight: 600, marginBottom: "12px" }}>
+        <div style={ui.statCard}>
+          <div style={{ ...typography.body, fontWeight: 600, marginBottom: "12px" }}>
             Total Jobs
           </div>
           <div style={{ fontSize: "48px", fontWeight: 800, color: "#111827" }}>
@@ -259,8 +162,8 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div style={statCardStyle}>
-          <div style={{ color: "#475569", fontWeight: 600, marginBottom: "12px" }}>
+        <div style={ui.statCard}>
+          <div style={{ ...typography.body, fontWeight: 600, marginBottom: "12px" }}>
             Visa Applications
           </div>
           <div style={{ fontSize: "48px", fontWeight: 800, color: "#111827" }}>
@@ -270,41 +173,29 @@ export default function AdminDashboardPage() {
       </section>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "24px" }}>
-        <section style={sectionCardStyle}>
-          <h2 style={{ marginTop: 0, marginBottom: "10px", fontSize: "30px" }}>
+        <section style={ui.sectionCard}>
+          <h2 style={{ ...typography.sectionTitle, marginTop: 0, marginBottom: "10px" }}>
             Jobs
           </h2>
-          <p style={{ marginTop: 0, color: "#475569", lineHeight: 1.7 }}>
+          <p style={{ ...typography.body, marginTop: 0 }}>
             Submitted job listings available on the platform.
           </p>
 
           {loading ? (
-            <p style={{ color: "#475569" }}>Loading jobs...</p>
+            <p style={typography.body}>Loading jobs...</p>
           ) : jobs.length === 0 ? (
-            <div
-              style={{
-                background: "#f8fafc",
-                border: "1px solid #e5e7eb",
-                borderRadius: "16px",
-                padding: "18px",
-                color: "#475569",
-              }}
-            >
-              No jobs found.
-            </div>
+            <div style={ui.softCard}>No jobs found.</div>
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
               {jobs.map((job) => (
                 <div
                   key={job.id}
                   style={{
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "18px",
+                    ...ui.softCard,
                     padding: "20px",
-                    background: "#f8fafc",
                   }}
                 >
-                  <h3 style={{ margin: "0 0 10px 0", fontSize: "24px" }}>
+                  <h3 style={{ ...typography.cardTitle, margin: "0 0 10px 0" }}>
                     {job.title}
                   </h3>
                   <p style={{ margin: "0 0 8px 0" }}>
@@ -313,47 +204,33 @@ export default function AdminDashboardPage() {
                   <p style={{ margin: "0 0 12px 0" }}>
                     <strong>Location:</strong> {job.location}
                   </p>
-                  <p style={{ margin: 0, color: "#475569", lineHeight: 1.7 }}>
-                    {job.description}
-                  </p>
+                  <p style={{ ...typography.body, margin: 0 }}>{job.description}</p>
                 </div>
               ))}
             </div>
           )}
         </section>
 
-        <section style={sectionCardStyle}>
-          <h2 style={{ marginTop: 0, marginBottom: "10px", fontSize: "30px" }}>
+        <section style={ui.sectionCard}>
+          <h2 style={{ ...typography.sectionTitle, marginTop: 0, marginBottom: "10px" }}>
             Visa Applications
           </h2>
-          <p style={{ marginTop: 0, color: "#475569", lineHeight: 1.7 }}>
+          <p style={{ ...typography.body, marginTop: 0 }}>
             Review applications and update their status.
           </p>
 
           {loading ? (
-            <p style={{ color: "#475569" }}>Loading visa applications...</p>
+            <p style={typography.body}>Loading visa applications...</p>
           ) : visaApplications.length === 0 ? (
-            <div
-              style={{
-                background: "#f8fafc",
-                border: "1px solid #e5e7eb",
-                borderRadius: "16px",
-                padding: "18px",
-                color: "#475569",
-              }}
-            >
-              No visa applications found.
-            </div>
+            <div style={ui.softCard}>No visa applications found.</div>
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
               {visaApplications.map((application) => (
                 <div
                   key={application.id}
                   style={{
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "18px",
+                    ...ui.softCard,
                     padding: "20px",
-                    background: "#f8fafc",
                   }}
                 >
                   <div
@@ -367,10 +244,10 @@ export default function AdminDashboardPage() {
                     }}
                   >
                     <div>
-                      <h3 style={{ margin: "0 0 8px 0", fontSize: "24px" }}>
+                      <h3 style={{ ...typography.cardTitle, margin: "0 0 8px 0" }}>
                         {application.full_name}
                       </h3>
-                      <div style={{ color: "#475569", lineHeight: 1.8 }}>
+                      <div style={{ ...typography.body, lineHeight: 1.8 }}>
                         <div>
                           <strong>Email:</strong> {application.email}
                         </div>
@@ -395,40 +272,40 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
 
-                    <div style={badgeStyle(application.status)}>
+                    <div style={statusBadge(application.status)}>
                       {application.status}
                     </div>
                   </div>
 
-                  <div style={{ display: "grid", gap: "10px", color: "#475569" }}>
-                    <div>
+                  <div style={{ display: "grid", gap: "10px" }}>
+                    <div style={typography.body}>
                       <strong style={{ color: "#111827" }}>Purpose of Visit:</strong>{" "}
                       {application.purpose_of_visit}
                     </div>
 
                     {application.host_or_company && (
-                      <div>
+                      <div style={typography.body}>
                         <strong style={{ color: "#111827" }}>Host or Company:</strong>{" "}
                         {application.host_or_company}
                       </div>
                     )}
 
                     {application.school_name && (
-                      <div>
+                      <div style={typography.body}>
                         <strong style={{ color: "#111827" }}>School Name:</strong>{" "}
                         {application.school_name}
                       </div>
                     )}
 
                     {application.accommodation_details && (
-                      <div>
+                      <div style={typography.body}>
                         <strong style={{ color: "#111827" }}>Accommodation Details:</strong>{" "}
                         {application.accommodation_details}
                       </div>
                     )}
 
                     {application.extra_notes && (
-                      <div>
+                      <div style={typography.body}>
                         <strong style={{ color: "#111827" }}>Extra Notes:</strong>{" "}
                         {application.extra_notes}
                       </div>
