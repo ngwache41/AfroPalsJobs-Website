@@ -1,10 +1,12 @@
 from collections.abc import Generator
 import os
 from datetime import datetime, timedelta, timezone
+import shutil
 
 import jwt
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -19,6 +21,11 @@ from app.visa_schemas import (
 )
 
 app = FastAPI(title="AfroPals Jobs API")
+
+# ✅ FILE STORAGE SETUP
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 frontend_url = os.getenv("FRONTEND_URL", "https://afropalsjobs.ru")
 secret_key = os.getenv("SECRET_KEY", "supersecretkey")
@@ -110,6 +117,8 @@ def admin_me(_: dict = Depends(verify_admin_token)):
     return {"message": "Authenticated admin"}
 
 
+# ===================== JOBS =====================
+
 @app.post("/jobs", response_model=JobRead)
 def create_job(payload: JobCreate, db: Session = Depends(get_db)):
     job = Job(
@@ -137,31 +146,64 @@ def get_job(job_id: int, db: Session = Depends(get_db)):
     return job
 
 
-@app.post("/visa-applications", response_model=VisaApplicationRead)
-def create_visa_application(
-    payload: VisaApplicationCreate,
+# ===================== VISA (UPDATED WITH FILE UPLOAD) =====================
+
+@app.post("/visa-applications")
+async def create_visa_application(
+    full_name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(...),
+    nationality: str = Form(...),
+    passport_number: str = Form(...),
+    visa_type: str = Form(...),
+    destination_city: str = Form(...),
+    travel_date: str = Form(...),
+    purpose_of_visit: str = Form(...),
+    host_or_company: str | None = Form(None),
+    school_name: str | None = Form(None),
+    accommodation_details: str | None = Form(None),
+    extra_notes: str | None = Form(None),
+    passport_file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
+    # ✅ SAVE FILE
+    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    filename = f"{timestamp}_{passport_file.filename}"
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(passport_file.file, buffer)
+
+    # ✅ SAVE TO DATABASE
     visa_application = VisaApplication(
-        full_name=payload.full_name,
-        email=payload.email,
-        phone=payload.phone,
-        nationality=payload.nationality,
-        passport_number=payload.passport_number,
-        visa_type=payload.visa_type,
-        destination_city=payload.destination_city,
-        travel_date=payload.travel_date,
-        purpose_of_visit=payload.purpose_of_visit,
-        host_or_company=payload.host_or_company,
-        school_name=payload.school_name,
-        accommodation_details=payload.accommodation_details,
-        extra_notes=payload.extra_notes,
+        full_name=full_name,
+        email=email,
+        phone=phone,
+        nationality=nationality,
+        passport_number=passport_number,
+        visa_type=visa_type,
+        destination_city=destination_city,
+        travel_date=travel_date,
+        purpose_of_visit=purpose_of_visit,
+        host_or_company=host_or_company,
+        school_name=school_name,
+        accommodation_details=accommodation_details,
+        extra_notes=extra_notes,
         status="pending",
     )
+
+    # ⚠️ Optional: store file path if your model supports it
+    if hasattr(visa_application, "file_path"):
+        visa_application.file_path = file_path
+
     db.add(visa_application)
     db.commit()
     db.refresh(visa_application)
-    return visa_application
+
+    return {
+        "message": "Application submitted",
+        "file_url": f"/uploads/{filename}"
+    }
 
 
 @app.get("/visa-applications", response_model=list[VisaApplicationRead])
