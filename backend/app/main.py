@@ -15,14 +15,12 @@ from app.models import Job
 from app.schemas import JobCreate, JobRead
 from app.visa_models import VisaApplication
 from app.visa_schemas import (
-    VisaApplicationCreate,
     VisaApplicationRead,
     VisaApplicationStatusUpdate,
 )
 
 app = FastAPI(title="AfroPals Jobs API")
 
-# ✅ FILE STORAGE SETUP
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
@@ -31,6 +29,8 @@ frontend_url = os.getenv("FRONTEND_URL", "https://afropalsjobs.ru")
 secret_key = os.getenv("SECRET_KEY", "supersecretkey")
 admin_username = os.getenv("ADMIN_USERNAME", "admin")
 admin_password = os.getenv("ADMIN_PASSWORD", "ChangeThisToAStrongPassword123!")
+employer_username = os.getenv("EMPLOYER_USERNAME", "employer")
+employer_password = os.getenv("EMPLOYER_PASSWORD", "ChangeEmployerPassword123!")
 access_token_expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
 origins = [
@@ -58,22 +58,27 @@ class AdminLoginRequest(BaseModel):
     password: str
 
 
-class AdminLoginResponse(BaseModel):
+class EmployerLoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class LoginResponse(BaseModel):
     access_token: str
     token_type: str
 
 
-def create_admin_token(username: str) -> str:
+def create_token(username: str, role: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=access_token_expire_minutes)
     payload = {
         "sub": username,
-        "role": "admin",
+        "role": role,
         "exp": expire,
     }
     return jwt.encode(payload, secret_key, algorithm="HS256")
 
 
-def verify_admin_token(authorization: str | None = Header(default=None)) -> dict:
+def verify_token_by_role(required_role: str, authorization: str | None = Header(default=None)) -> dict:
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Not authenticated")
 
@@ -84,10 +89,18 @@ def verify_admin_token(authorization: str | None = Header(default=None)) -> dict
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
-    if payload.get("role") != "admin":
+    if payload.get("role") != required_role:
         raise HTTPException(status_code=403, detail="Forbidden")
 
     return payload
+
+
+def verify_admin_token(authorization: str | None = Header(default=None)) -> dict:
+    return verify_token_by_role("admin", authorization)
+
+
+def verify_employer_token(authorization: str | None = Header(default=None)) -> dict:
+    return verify_token_by_role("employer", authorization)
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -103,13 +116,13 @@ def root():
     return {"message": "API is running"}
 
 
-@app.post("/admin/login", response_model=AdminLoginResponse)
+@app.post("/admin/login", response_model=LoginResponse)
 def admin_login(payload: AdminLoginRequest):
     if payload.username != admin_username or payload.password != admin_password:
         raise HTTPException(status_code=401, detail="Invalid admin credentials")
 
-    access_token = create_admin_token(payload.username)
-    return AdminLoginResponse(access_token=access_token, token_type="bearer")
+    access_token = create_token(payload.username, "admin")
+    return LoginResponse(access_token=access_token, token_type="bearer")
 
 
 @app.get("/admin/me")
@@ -117,10 +130,40 @@ def admin_me(_: dict = Depends(verify_admin_token)):
     return {"message": "Authenticated admin"}
 
 
-# ===================== JOBS =====================
+@app.post("/employer/login", response_model=LoginResponse)
+def employer_login(payload: EmployerLoginRequest):
+    if payload.username != employer_username or payload.password != employer_password:
+        raise HTTPException(status_code=401, detail="Invalid employer credentials")
+
+    access_token = create_token(payload.username, "employer")
+    return LoginResponse(access_token=access_token, token_type="bearer")
+
+
+@app.get("/employer/me")
+def employer_me(_: dict = Depends(verify_employer_token)):
+    return {"message": "Authenticated employer"}
+
 
 @app.post("/jobs", response_model=JobRead)
 def create_job(payload: JobCreate, db: Session = Depends(get_db)):
+    job = Job(
+        title=payload.title,
+        company=payload.company,
+        location=payload.location,
+        description=payload.description,
+    )
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+    return job
+
+
+@app.post("/employer/jobs", response_model=JobRead)
+def create_employer_job(
+    payload: JobCreate,
+    db: Session = Depends(get_db),
+    _: dict = Depends(verify_employer_token),
+):
     job = Job(
         title=payload.title,
         company=payload.company,
@@ -146,8 +189,6 @@ def get_job(job_id: int, db: Session = Depends(get_db)):
     return job
 
 
-# ===================== VISA (UPDATED WITH FILE UPLOAD) =====================
-
 @app.post("/visa-applications")
 async def create_visa_application(
     full_name: str = Form(...),
@@ -166,7 +207,6 @@ async def create_visa_application(
     passport_file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
-    # ✅ SAVE FILE
     timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
     filename = f"{timestamp}_{passport_file.filename}"
     file_path = os.path.join(UPLOAD_DIR, filename)
@@ -174,7 +214,6 @@ async def create_visa_application(
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(passport_file.file, buffer)
 
-    # ✅ SAVE TO DATABASE
     visa_application = VisaApplication(
         full_name=full_name,
         email=email,
@@ -192,7 +231,6 @@ async def create_visa_application(
         status="pending",
     )
 
-    # ⚠️ Optional: store file path if your model supports it
     if hasattr(visa_application, "file_path"):
         visa_application.file_path = file_path
 
