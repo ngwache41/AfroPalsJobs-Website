@@ -37,6 +37,8 @@ export default function App() {
   const isVisa = location.pathname === "/visa";
   const isAdmin = location.pathname === "/admin";
   const isAdminLogin = location.pathname === "/admin-login";
+  const isEmployerLogin = location.pathname === "/employer-login";
+  const isEmployerDashboard = location.pathname === "/employer-dashboard";
 
   return (
     <div
@@ -119,6 +121,13 @@ export default function App() {
 
             <Link to="/visa" style={getLinkStyle(isVisa)}>
               Visa & Invitations
+            </Link>
+
+            <Link
+              to="/employer-login"
+              style={getLinkStyle(isEmployerLogin || isEmployerDashboard)}
+            >
+              Employer
             </Link>
 
             <Link to="/admin" style={getLinkStyle(isAdmin)}>
@@ -207,18 +216,28 @@ export default function App() {
               <Link to="/" style={{ color: "#cbd5e1", textDecoration: "none" }}>
                 Home
               </Link>
+
               <Link
                 to="/jobs"
                 style={{ color: "#cbd5e1", textDecoration: "none" }}
               >
                 Jobs
               </Link>
+
               <Link
                 to="/visa"
                 style={{ color: "#cbd5e1", textDecoration: "none" }}
               >
                 Visa & Invitations
               </Link>
+
+              <Link
+                to="/employer-login"
+                style={{ color: "#cbd5e1", textDecoration: "none" }}
+              >
+                Employer Login
+              </Link>
+
               <Link
                 to="/admin-login"
                 style={{ color: "#cbd5e1", textDecoration: "none" }}

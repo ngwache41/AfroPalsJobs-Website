@@ -4,28 +4,20 @@ import Home from "./pages/Home";
 import JobsPage from "./pages/JobsPage";
 import VisaApplicationPage from "./pages/VisaApplicationPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import EmployerLoginPage from "./pages/EmployerLoginPage";
+import EmployerDashboardPage from "./pages/EmployerDashboardPage";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      {
-        path: "/",
-        element: <Home />,
-      },
-      {
-        path: "/jobs",
-        element: <JobsPage />,
-      },
-      {
-        path: "/visa",
-        element: <VisaApplicationPage />,
-      },
-      {
-        path: "/admin",
-        element: <AdminDashboardPage />,
-      },
+      { path: "/", element: <Home /> },
+      { path: "/jobs", element: <JobsPage /> },
+      { path: "/visa", element: <VisaApplicationPage /> },
+      { path: "/admin", element: <AdminDashboardPage /> },
+      { path: "/employer-login", element: <EmployerLoginPage /> },
+      { path: "/employer-dashboard", element: <EmployerDashboardPage /> },
     ],
   },
 ]);
