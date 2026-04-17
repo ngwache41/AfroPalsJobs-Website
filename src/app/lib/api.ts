@@ -11,6 +11,138 @@ export type Job = {
   description: string;
 };
 
+export type VisaApplication = {
+  id: number;
+  full_name: string;
+  email: string;
+  phone: string;
+  nationality: string;
+  passport_number: string;
+  visa_type: string;
+  destination_city: string;
+  travel_date: string;
+  purpose_of_visit: string;
+  host_or_company?: string | null;
+  school_name?: string | null;
+  accommodation_details?: string | null;
+  extra_notes?: string | null;
+  status: string;
+};
+
+// ================= PUBLIC JOBS =================
+
+export async function getJobs(): Promise<Job[]> {
+  const response = await fetch(`${API_BASE_URL}/jobs`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch jobs");
+  }
+
+  return response.json();
+}
+
+export async function createJob(payload: Omit<Job, "id">): Promise<Job> {
+  const response = await fetch(`${API_BASE_URL}/jobs`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create job");
+  }
+
+  return response.json();
+}
+
+// ================= VISA =================
+
+export async function createVisaApplication(formData: FormData) {
+  const response = await fetch(`${API_BASE_URL}/visa-applications`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to submit visa application");
+  }
+
+  return response.json();
+}
+
+export async function getVisaApplications(): Promise<VisaApplication[]> {
+  const token = localStorage.getItem("admin_token");
+
+  const response = await fetch(`${API_BASE_URL}/visa-applications`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch visa applications");
+  }
+
+  return response.json();
+}
+
+export async function updateVisaApplicationStatus(
+  applicationId: number,
+  status: string
+): Promise<VisaApplication> {
+  const token = localStorage.getItem("admin_token");
+
+  const response = await fetch(
+    `${API_BASE_URL}/visa-applications/${applicationId}/status`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to update visa application status");
+  }
+
+  return response.json();
+}
+
+// ================= ADMIN AUTH =================
+
+export async function adminLogin(username: string, password: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Admin login failed");
+  }
+
+  return response.json();
+}
+
+export function saveAdminToken(token: string) {
+  localStorage.setItem("admin_token", token);
+}
+
+export function clearAdminToken() {
+  localStorage.removeItem("admin_token");
+}
+
+export function isAdminLoggedIn(): boolean {
+  return Boolean(localStorage.getItem("admin_token"));
+}
+
 // ================= EMPLOYER AUTH =================
 
 export async function employerLogin(username: string, password: string) {
@@ -23,13 +155,13 @@ export async function employerLogin(username: string, password: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Login failed");
+    throw new Error("Employer login failed");
   }
 
   return response.json();
 }
 
-// ================= EMPLOYER JOB =================
+// ================= EMPLOYER JOBS =================
 
 export async function createEmployerJob(
   payload: Omit<Job, "id">
@@ -46,19 +178,7 @@ export async function createEmployerJob(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create job");
-  }
-
-  return response.json();
-}
-
-// ================= PUBLIC JOBS =================
-
-export async function getJobs(): Promise<Job[]> {
-  const response = await fetch(`${API_BASE_URL}/jobs`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch jobs");
+    throw new Error("Failed to create employer job");
   }
 
   return response.json();
