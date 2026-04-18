@@ -35,7 +35,8 @@ export async function getJobs(): Promise<Job[]> {
   const response = await fetch(`${API_BASE_URL}/jobs`);
 
   if (!response.ok) {
-    throw new Error("Failed to fetch jobs");
+    const text = await response.text();
+    throw new Error(`Failed to fetch jobs: ${response.status} ${text}`);
   }
 
   return response.json();
@@ -51,7 +52,8 @@ export async function createJob(payload: Omit<Job, "id">): Promise<Job> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create job");
+    const text = await response.text();
+    throw new Error(`Failed to create job: ${response.status} ${text}`);
   }
 
   return response.json();
@@ -66,7 +68,8 @@ export async function createVisaApplication(formData: FormData) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to submit visa application");
+    const text = await response.text();
+    throw new Error(`Failed to submit visa application: ${response.status} ${text}`);
   }
 
   return response.json();
@@ -82,7 +85,8 @@ export async function getVisaApplications(): Promise<VisaApplication[]> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch visa applications");
+    const text = await response.text();
+    throw new Error(`Failed to fetch visa applications: ${response.status} ${text}`);
   }
 
   return response.json();
@@ -107,7 +111,8 @@ export async function updateVisaApplicationStatus(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to update visa application status");
+    const text = await response.text();
+    throw new Error(`Failed to update visa application status: ${response.status} ${text}`);
   }
 
   return response.json();
@@ -125,7 +130,8 @@ export async function adminLogin(username: string, password: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Admin login failed");
+    const text = await response.text();
+    throw new Error(`Admin login failed: ${response.status} ${text}`);
   }
 
   return response.json();
@@ -155,7 +161,25 @@ export async function employerLogin(username: string, password: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Employer login failed");
+    const text = await response.text();
+    throw new Error(`Employer login failed: ${response.status} ${text}`);
+  }
+
+  return response.json();
+}
+
+export async function getEmployerMe() {
+  const token = localStorage.getItem("employer_token");
+
+  const response = await fetch(`${API_BASE_URL}/employer/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Employer auth check failed: ${response.status} ${text}`);
   }
 
   return response.json();
@@ -178,7 +202,8 @@ export async function createEmployerJob(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create employer job");
+    const text = await response.text();
+    throw new Error(`Failed to create employer job: ${response.status} ${text}`);
   }
 
   return response.json();
