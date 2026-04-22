@@ -3,10 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   clearAdminToken,
   getJobs,
+  getJobApplications,
   getVisaApplications,
   isAdminLoggedIn,
   updateVisaApplicationStatus,
   Job,
+  JobApplication,
   VisaApplication,
 } from "../lib/api";
 import { statusBadge, typography, ui } from "../theme";
@@ -17,9 +19,13 @@ const actionButtonStyle: React.CSSProperties = {
   fontSize: "14px",
 };
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
   const [visaApplications, setVisaApplications] = useState<VisaApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -38,12 +44,14 @@ export default function AdminDashboardPage() {
       setLoading(true);
       setErrorMessage("");
 
-      const [jobsData, visaData] = await Promise.all([
+      const [jobsData, jobApplicationsData, visaData] = await Promise.all([
         getJobs(),
+        getJobApplications(),
         getVisaApplications(),
       ]);
 
       setJobs(jobsData);
+      setJobApplications(jobApplicationsData);
       setVisaApplications(visaData);
     } catch (error) {
       console.error(error);
@@ -69,6 +77,11 @@ export default function AdminDashboardPage() {
   function handleLogout() {
     clearAdminToken();
     navigate("/admin-login");
+  }
+
+  function getJobTitle(jobId: number) {
+    const job = jobs.find((item) => item.id === jobId);
+    return job ? job.title : `Job #${jobId}`;
   }
 
   if (!isAdminLoggedIn()) {
@@ -119,8 +132,7 @@ export default function AdminDashboardPage() {
                 maxWidth: "860px",
               }}
             >
-              Review submitted jobs and visa applications from the website in one
-              organized control panel.
+              Review jobs, job applications, and visa applications from one organized control panel.
             </p>
           </div>
 
@@ -148,7 +160,7 @@ export default function AdminDashboardPage() {
       <section
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
           gap: "20px",
           marginBottom: "28px",
         }}
@@ -159,6 +171,15 @@ export default function AdminDashboardPage() {
           </div>
           <div style={{ fontSize: "48px", fontWeight: 800, color: "#111827" }}>
             {loading ? "..." : jobs.length}
+          </div>
+        </div>
+
+        <div style={ui.statCard}>
+          <div style={{ ...typography.body, fontWeight: 600, marginBottom: "12px" }}>
+            Job Applications
+          </div>
+          <div style={{ fontSize: "48px", fontWeight: 800, color: "#111827" }}>
+            {loading ? "..." : jobApplications.length}
           </div>
         </div>
 
@@ -188,13 +209,7 @@ export default function AdminDashboardPage() {
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
               {jobs.map((job) => (
-                <div
-                  key={job.id}
-                  style={{
-                    ...ui.softCard,
-                    padding: "20px",
-                  }}
-                >
+                <div key={job.id} style={{ ...ui.softCard, padding: "20px" }}>
                   <h3 style={{ ...typography.cardTitle, margin: "0 0 10px 0" }}>
                     {job.title}
                   </h3>
@@ -205,6 +220,80 @@ export default function AdminDashboardPage() {
                     <strong>Location:</strong> {job.location}
                   </p>
                   <p style={{ ...typography.body, margin: 0 }}>{job.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section style={ui.sectionCard}>
+          <h2 style={{ ...typography.sectionTitle, marginTop: 0, marginBottom: "10px" }}>
+            Job Applications
+          </h2>
+          <p style={{ ...typography.body, marginTop: 0 }}>
+            Review candidate applications and uploaded CV files.
+          </p>
+
+          {loading ? (
+            <p style={typography.body}>Loading job applications...</p>
+          ) : jobApplications.length === 0 ? (
+            <div style={ui.softCard}>No job applications found.</div>
+          ) : (
+            <div style={{ display: "grid", gap: "16px" }}>
+              {jobApplications.map((application) => (
+                <div key={application.id} style={{ ...ui.softCard, padding: "20px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: "16px",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                      marginBottom: "14px",
+                    }}
+                  >
+                    <div>
+                      <h3 style={{ ...typography.cardTitle, margin: "0 0 8px 0" }}>
+                        {application.full_name}
+                      </h3>
+                      <div style={{ ...typography.body, lineHeight: 1.8 }}>
+                        <div>
+                          <strong>Job:</strong> {getJobTitle(application.job_id)}
+                        </div>
+                        <div>
+                          <strong>Email:</strong> {application.email}
+                        </div>
+                        <div>
+                          <strong>Phone:</strong> {application.phone}
+                        </div>
+                        <div>
+                          <strong>Status:</strong> {application.status}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={statusBadge(application.status)}>
+                      {application.status}
+                    </div>
+                  </div>
+
+                  <div style={{ ...typography.body, marginBottom: "12px" }}>
+                    <strong style={{ color: "#111827" }}>Cover Letter:</strong>{" "}
+                    {application.cover_letter || "No cover letter provided."}
+                  </div>
+
+                  <a
+                    href={`${API_BASE_URL}/${application.cv_file_path.replace(/\\/g, "/")}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      ...ui.primaryButton,
+                      display: "inline-block",
+                      textDecoration: "none",
+                    }}
+                  >
+                    View Uploaded CV
+                  </a>
                 </div>
               ))}
             </div>
@@ -226,13 +315,7 @@ export default function AdminDashboardPage() {
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
               {visaApplications.map((application) => (
-                <div
-                  key={application.id}
-                  style={{
-                    ...ui.softCard,
-                    padding: "20px",
-                  }}
-                >
+                <div key={application.id} style={{ ...ui.softCard, padding: "20px" }}>
                   <div
                     style={{
                       display: "flex",
