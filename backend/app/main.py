@@ -37,7 +37,7 @@ access_token_expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
 
 resend_api_key = os.getenv("RESEND_API_KEY", "")
 from_email = os.getenv("FROM_EMAIL", "info@afropalsjobs.ru")
-admin_notification_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "info@afropalsjobs.ru")
+admin_notification_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "afropalsjobs@yandex.ru")
 
 origins = [
     frontend_url,
@@ -69,9 +69,14 @@ class LoginResponse(BaseModel):
     token_type: str
 
 
-def send_email_via_resend(to_email: str, subject: str, html: str) -> None:
-    if not resend_api_key or not from_email:
-        return
+def send_email_via_resend(to_email: str, subject: str, html: str) -> dict:
+    if not resend_api_key:
+        print("RESEND DEBUG: RESEND_API_KEY is missing")
+        return {"ok": False, "error": "RESEND_API_KEY is missing"}
+
+    if not from_email:
+        print("RESEND DEBUG: FROM_EMAIL is missing")
+        return {"ok": False, "error": "FROM_EMAIL is missing"}
 
     payload = {
         "from": from_email,
@@ -79,6 +84,11 @@ def send_email_via_resend(to_email: str, subject: str, html: str) -> None:
         "subject": subject,
         "html": html,
     }
+
+    print("RESEND DEBUG: sending email")
+    print("RESEND DEBUG: from =", from_email)
+    print("RESEND DEBUG: to =", to_email)
+    print("RESEND DEBUG: subject =", subject)
 
     data = json.dumps(payload).encode("utf-8")
     req = request.Request(
@@ -93,22 +103,27 @@ def send_email_via_resend(to_email: str, subject: str, html: str) -> None:
 
     try:
         with request.urlopen(req, timeout=20) as response:
-            response.read()
+            body = response.read().decode("utf-8")
+            print("RESEND DEBUG: success response =", body)
+            return {"ok": True, "response": body}
     except error.HTTPError as exc:
         try:
-            print("Resend HTTP error:", exc.read().decode("utf-8"))
+            error_body = exc.read().decode("utf-8")
         except Exception:
-            print("Resend HTTP error")
+            error_body = "Unable to read error body"
+        print("RESEND DEBUG: HTTP error =", exc.code, error_body)
+        return {"ok": False, "error": f"HTTP {exc.code}: {error_body}"}
     except Exception as exc:
-        print("Resend send error:", str(exc))
+        print("RESEND DEBUG: send error =", str(exc))
+        return {"ok": False, "error": str(exc)}
 
 
-def send_admin_notification(subject: str, html: str) -> None:
-    send_email_via_resend(admin_notification_email, subject, html)
+def send_admin_notification(subject: str, html: str) -> dict:
+    return send_email_via_resend(admin_notification_email, subject, html)
 
 
-def send_employer_notification(subject: str, html: str) -> None:
-    send_email_via_resend(admin_notification_email, subject, html)
+def send_employer_notification(subject: str, html: str) -> dict:
+    return send_email_via_resend(admin_notification_email, subject, html)
 
 
 def create_token(username: str, role: str) -> str:
@@ -159,6 +174,20 @@ def get_db() -> Generator[Session, None, None]:
 @app.get("/")
 def root():
     return {"message": "API is running"}
+
+
+@app.get("/debug/send-test-email")
+def debug_send_test_email():
+    result = send_email_via_resend(
+        to_email=admin_notification_email,
+        subject="AfroPals test email",
+        html="""
+        <h2>Test Email</h2>
+        <p>This is a direct test email from AfroPals backend.</p>
+        <p>If you received this, Resend integration is working.</p>
+        """,
+    )
+    return result
 
 
 # ================= ADMIN AUTH =================
@@ -254,7 +283,7 @@ def create_employer_job(
     db.commit()
     db.refresh(job)
 
-    send_admin_notification(
+    notification_result = send_admin_notification(
         subject="New employer job pending approval",
         html=f"""
         <h2>New Job Pending Approval</h2>
@@ -265,6 +294,7 @@ def create_employer_job(
         <p>Please review this job in the admin dashboard.</p>
         """,
     )
+    print("RESEND DEBUG employer job notification =", notification_result)
 
     return job
 
@@ -284,7 +314,7 @@ def update_job_status(
     db.commit()
     db.refresh(job)
 
-    send_employer_notification(
+    notification_result = send_employer_notification(
         subject=f"Job status updated: {job.title}",
         html=f"""
         <h2>Job Status Updated</h2>
@@ -294,6 +324,7 @@ def update_job_status(
         <p>Your submitted job has been reviewed by the admin.</p>
         """,
     )
+    print("RESEND DEBUG job status notification =", notification_result)
 
     return job
 
@@ -334,7 +365,7 @@ async def create_job_application(
     db.commit()
     db.refresh(application)
 
-    send_admin_notification(
+    notification_result = send_admin_notification(
         subject="New job application received",
         html=f"""
         <h2>New Job Application</h2>
@@ -346,6 +377,7 @@ async def create_job_application(
         <p>Please review this application in the admin dashboard.</p>
         """,
     )
+    print("RESEND DEBUG job application notification =", notification_result)
 
     return {
         "message": "Job application submitted successfully",
@@ -429,7 +461,7 @@ async def create_visa_application(
     db.commit()
     db.refresh(visa_application)
 
-    send_admin_notification(
+    notification_result = send_admin_notification(
         subject="New visa application received",
         html=f"""
         <h2>New Visa Application</h2>
@@ -445,6 +477,7 @@ async def create_visa_application(
         <p>Please review this application in the admin dashboard.</p>
         """,
     )
+    print("RESEND DEBUG visa application notification =", notification_result)
 
     return {
         "message": "Application submitted",
