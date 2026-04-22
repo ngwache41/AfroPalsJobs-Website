@@ -29,6 +29,17 @@ export type VisaApplication = {
   status: string;
 };
 
+export type JobApplication = {
+  id: number;
+  job_id: number;
+  full_name: string;
+  email: string;
+  phone: string;
+  cover_letter: string;
+  cv_file_path: string;
+  status: string;
+};
+
 // ================= PUBLIC JOBS =================
 
 export async function getJobs(): Promise<Job[]> {
@@ -54,6 +65,39 @@ export async function createJob(payload: Omit<Job, "id">): Promise<Job> {
   if (!response.ok) {
     const text = await response.text();
     throw new Error(`Failed to create job: ${response.status} ${text}`);
+  }
+
+  return response.json();
+}
+
+// ================= JOB APPLICATIONS =================
+
+export async function createJobApplication(formData: FormData) {
+  const response = await fetch(`${API_BASE_URL}/job-applications`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to submit job application: ${response.status} ${text}`);
+  }
+
+  return response.json();
+}
+
+export async function getJobApplications(): Promise<JobApplication[]> {
+  const token = localStorage.getItem("admin_token");
+
+  const response = await fetch(`${API_BASE_URL}/job-applications`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to fetch job applications: ${response.status} ${text}`);
   }
 
   return response.json();
