@@ -16,3 +16,16 @@ class JobRead(BaseModel):
     description: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class JobApplicationRead(BaseModel):
+    id: int
+    job_id: int
+    full_name: str
+    email: str
+    phone: str
+    cover_letter: str
+    cv_file_path: str
+    status: str
+
+    model_config = ConfigDict(from_attributes=True)

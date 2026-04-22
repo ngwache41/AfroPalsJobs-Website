@@ -11,8 +11,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import Base, SessionLocal, engine
-from app.models import Job
-from app.schemas import JobCreate, JobRead
+from app.models import Job, JobApplication
+from app.schemas import JobCreate, JobRead, JobApplicationRead
 from app.visa_models import VisaApplication
 from app.visa_schemas import VisaApplicationRead, VisaApplicationStatusUpdate
 
@@ -190,6 +190,73 @@ def create_employer_job(
     db.commit()
     db.refresh(job)
     return job
+
+
+# ================= JOB APPLICATIONS =================
+
+@app.post("/job-applications")
+async def create_job_application(
+    job_id: int = Form(...),
+    full_name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(...),
+    cover_letter: str = Form(""),
+    cv_file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    filename = f"{timestamp}_{cv_file.filename}"
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(cv_file.file, buffer)
+
+    application = JobApplication(
+        job_id=job_id,
+        full_name=full_name,
+        email=email,
+        phone=phone,
+        cover_letter=cover_letter,
+        cv_file_path=file_path,
+        status="pending",
+    )
+    db.add(application)
+    db.commit()
+    db.refresh(application)
+
+    return {
+        "message": "Job application submitted successfully",
+        "application_id": application.id,
+        "cv_file_url": f"/uploads/{filename}",
+    }
+
+
+@app.get("/job-applications", response_model=list[JobApplicationRead])
+def list_job_applications(
+    db: Session = Depends(get_db),
+    _: dict = Depends(verify_admin_token),
+):
+    return db.query(JobApplication).all()
+
+
+@app.get("/job-applications/{application_id}", response_model=JobApplicationRead)
+def get_job_application(
+    application_id: int,
+    db: Session = Depends(get_db),
+    _: dict = Depends(verify_admin_token),
+):
+    application = (
+        db.query(JobApplication)
+        .filter(JobApplication.id == application_id)
+        .first()
+    )
+    if application is None:
+        raise HTTPException(status_code=404, detail="Job application not found")
+    return application
 
 
 # ================= VISA =================
