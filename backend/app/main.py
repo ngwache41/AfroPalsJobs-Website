@@ -1,7 +1,9 @@
 from collections.abc import Generator
+import json
 import os
 from datetime import datetime, timedelta, timezone
 import shutil
+from urllib import request, error
 
 import jwt
 from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form
@@ -33,6 +35,10 @@ employer_password = os.getenv("EMPLOYER_PASSWORD", "ChangeEmployerPassword123!")
 
 access_token_expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
+resend_api_key = os.getenv("RESEND_API_KEY", "")
+from_email = os.getenv("FROM_EMAIL", "info@afropalsjobs.ru")
+admin_notification_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "info@afropalsjobs.ru")
+
 origins = [
     frontend_url,
     "https://afropalsjobs.ru",
@@ -61,6 +67,48 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str
+
+
+def send_email_via_resend(to_email: str, subject: str, html: str) -> None:
+    if not resend_api_key or not from_email:
+        return
+
+    payload = {
+        "from": from_email,
+        "to": [to_email],
+        "subject": subject,
+        "html": html,
+    }
+
+    data = json.dumps(payload).encode("utf-8")
+    req = request.Request(
+        url="https://api.resend.com/emails",
+        data=data,
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {resend_api_key}",
+            "Content-Type": "application/json",
+        },
+    )
+
+    try:
+        with request.urlopen(req, timeout=20) as response:
+            response.read()
+    except error.HTTPError as exc:
+        try:
+            print("Resend HTTP error:", exc.read().decode("utf-8"))
+        except Exception:
+            print("Resend HTTP error")
+    except Exception as exc:
+        print("Resend send error:", str(exc))
+
+
+def send_admin_notification(subject: str, html: str) -> None:
+    send_email_via_resend(admin_notification_email, subject, html)
+
+
+def send_employer_notification(subject: str, html: str) -> None:
+    send_email_via_resend(admin_notification_email, subject, html)
 
 
 def create_token(username: str, role: str) -> str:
@@ -205,6 +253,19 @@ def create_employer_job(
     db.add(job)
     db.commit()
     db.refresh(job)
+
+    send_admin_notification(
+        subject="New employer job pending approval",
+        html=f"""
+        <h2>New Job Pending Approval</h2>
+        <p><strong>Title:</strong> {job.title}</p>
+        <p><strong>Company:</strong> {job.company}</p>
+        <p><strong>Location:</strong> {job.location}</p>
+        <p><strong>Status:</strong> {job.status}</p>
+        <p>Please review this job in the admin dashboard.</p>
+        """,
+    )
+
     return job
 
 
@@ -222,6 +283,18 @@ def update_job_status(
     job.status = payload.status
     db.commit()
     db.refresh(job)
+
+    send_employer_notification(
+        subject=f"Job status updated: {job.title}",
+        html=f"""
+        <h2>Job Status Updated</h2>
+        <p><strong>Title:</strong> {job.title}</p>
+        <p><strong>Company:</strong> {job.company}</p>
+        <p><strong>New Status:</strong> {job.status}</p>
+        <p>Your submitted job has been reviewed by the admin.</p>
+        """,
+    )
+
     return job
 
 
@@ -260,6 +333,19 @@ async def create_job_application(
     db.add(application)
     db.commit()
     db.refresh(application)
+
+    send_admin_notification(
+        subject="New job application received",
+        html=f"""
+        <h2>New Job Application</h2>
+        <p><strong>Job:</strong> {job.title}</p>
+        <p><strong>Applicant:</strong> {application.full_name}</p>
+        <p><strong>Email:</strong> {application.email}</p>
+        <p><strong>Phone:</strong> {application.phone}</p>
+        <p><strong>Cover Letter:</strong> {application.cover_letter or "No cover letter provided."}</p>
+        <p>Please review this application in the admin dashboard.</p>
+        """,
+    )
 
     return {
         "message": "Job application submitted successfully",
@@ -342,6 +428,23 @@ async def create_visa_application(
     db.add(visa_application)
     db.commit()
     db.refresh(visa_application)
+
+    send_admin_notification(
+        subject="New visa application received",
+        html=f"""
+        <h2>New Visa Application</h2>
+        <p><strong>Full Name:</strong> {visa_application.full_name}</p>
+        <p><strong>Email:</strong> {visa_application.email}</p>
+        <p><strong>Phone:</strong> {visa_application.phone}</p>
+        <p><strong>Nationality:</strong> {visa_application.nationality}</p>
+        <p><strong>Passport Number:</strong> {visa_application.passport_number}</p>
+        <p><strong>Visa Type:</strong> {visa_application.visa_type}</p>
+        <p><strong>Destination City:</strong> {visa_application.destination_city}</p>
+        <p><strong>Travel Date:</strong> {visa_application.travel_date}</p>
+        <p><strong>Purpose of Visit:</strong> {visa_application.purpose_of_visit}</p>
+        <p>Please review this application in the admin dashboard.</p>
+        """,
+    )
 
     return {
         "message": "Application submitted",
