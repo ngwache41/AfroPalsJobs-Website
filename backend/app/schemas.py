@@ -8,12 +8,18 @@ class JobCreate(BaseModel):
     description: str
 
 
+class JobStatusUpdate(BaseModel):
+    status: str
+
+
 class JobRead(BaseModel):
     id: int
     title: str
     company: str
     location: str
     description: str
+    status: str
+    created_by: str
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -12,6 +12,8 @@ class Job(Base):
     company: Mapped[str] = mapped_column(String(255), nullable=False)
     location: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")
+    created_by: Mapped[str] = mapped_column(String(255), nullable=False, default="admin")
 
 
 class JobApplication(Base):
