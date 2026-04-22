@@ -29,6 +29,32 @@ function getAnchorStyle(): React.CSSProperties {
   };
 }
 
+const whatsappMessage = encodeURIComponent(
+  "Hello AfroPals Jobs, I would like to ask about jobs, visa support, or invitation services."
+);
+
+const whatsappLink = `https://wa.me/79332742692?text=${whatsappMessage}`;
+
+const footerTitleStyle: React.CSSProperties = {
+  fontWeight: 700,
+  color: "#ffffff",
+  marginBottom: "14px",
+  fontSize: "18px",
+};
+
+const footerLinkStyle: React.CSSProperties = {
+  color: "#cbd5e1",
+  textDecoration: "none",
+  lineHeight: 1.8,
+};
+
+const contactCardStyle: React.CSSProperties = {
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  borderRadius: "18px",
+  padding: "18px",
+};
+
 export default function App() {
   const location = useLocation();
 
@@ -173,18 +199,18 @@ export default function App() {
           style={{
             maxWidth: "1200px",
             margin: "0 auto",
-            padding: "36px 24px",
+            padding: "42px 24px",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gridTemplateColumns: "1.2fr 1fr 1.2fr",
             gap: "24px",
           }}
         >
           <div>
             <div
               style={{
-                fontSize: "22px",
+                fontSize: "24px",
                 fontWeight: 700,
-                marginBottom: "10px",
+                marginBottom: "12px",
                 color: "#ffffff",
               }}
             >
@@ -193,85 +219,94 @@ export default function App() {
             <p
               style={{
                 margin: 0,
-                lineHeight: 1.8,
+                lineHeight: 1.9,
                 color: "#cbd5e1",
+                maxWidth: "340px",
               }}
             >
-              Verified jobs, visa support, and invitation application assistance
-              in one organized platform.
+              Verified jobs, visa support, and invitation assistance in one
+              professional platform for job seekers, employers, and travelers.
             </p>
           </div>
 
           <div>
-            <div
-              style={{
-                fontWeight: 700,
-                color: "#ffffff",
-                marginBottom: "12px",
-              }}
-            >
-              Quick Links
-            </div>
-            <div style={{ display: "grid", gap: "10px" }}>
-              <Link to="/" style={{ color: "#cbd5e1", textDecoration: "none" }}>
+            <div style={footerTitleStyle}>Quick Links</div>
+            <div style={{ display: "grid", gap: "8px" }}>
+              <Link to="/" style={footerLinkStyle}>
                 Home
               </Link>
-
-              <Link
-                to="/jobs"
-                style={{ color: "#cbd5e1", textDecoration: "none" }}
-              >
+              <Link to="/jobs" style={footerLinkStyle}>
                 Jobs
               </Link>
-
-              <Link
-                to="/visa"
-                style={{ color: "#cbd5e1", textDecoration: "none" }}
-              >
+              <Link to="/visa" style={footerLinkStyle}>
                 Visa & Invitations
               </Link>
-
-              <Link
-                to="/employer-login"
-                style={{ color: "#cbd5e1", textDecoration: "none" }}
-              >
+              <Link to="/employer-login" style={footerLinkStyle}>
                 Employer Login
               </Link>
-
-              <Link
-                to="/admin-login"
-                style={{ color: "#cbd5e1", textDecoration: "none" }}
-              >
+              <Link to="/admin-login" style={footerLinkStyle}>
                 Admin Login
               </Link>
             </div>
           </div>
 
           <div>
-            <div
-              style={{
-                fontWeight: 700,
-                color: "#ffffff",
-                marginBottom: "12px",
-              }}
-            >
-              Contact
-            </div>
-            <div style={{ display: "grid", gap: "10px", color: "#cbd5e1" }}>
-              <div>
-                <strong>Phone:</strong> +79332742692
+            <div style={footerTitleStyle}>Contact</div>
+
+            <div style={{ display: "grid", gap: "12px" }}>
+              <div style={contactCardStyle}>
+                <div style={{ color: "#94a3b8", fontSize: "13px", marginBottom: "6px" }}>
+                  WEBSITE
+                </div>
+                <a
+                  href="https://www.afropalsjobs.ru"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ ...footerLinkStyle, color: "#ffffff", fontWeight: 600 }}
+                >
+                  www.afropalsjobs.ru
+                </a>
               </div>
-              <div>
-                <strong>Email 1:</strong> info@afropalsjobs.ru
+
+              <div style={contactCardStyle}>
+                <div style={{ color: "#94a3b8", fontSize: "13px", marginBottom: "6px" }}>
+                  EMAILS
+                </div>
+                <div style={{ display: "grid", gap: "4px" }}>
+                  <a href="mailto:info@afropalsjobs.ru" style={footerLinkStyle}>
+                    info@afropalsjobs.ru
+                  </a>
+                  <a href="mailto:afropalsjobs@yandex.ru" style={footerLinkStyle}>
+                    afropalsjobs@yandex.ru
+                  </a>
+                </div>
               </div>
-              <div>
-                <strong>Email 2:</strong> afropalsjobs@yandex.ru
-              </div>
-              <div>
-                <strong>Website:</strong> www.afropalsjobs.ru
-              </div>
-              <div>
-                <strong>WhatsApp:</strong> Available on request
+
+              <div style={contactCardStyle}>
+                <div style={{ color: "#94a3b8", fontSize: "13px", marginBottom: "6px" }}>
+                  WHATSAPP
+                </div>
+                <a
+                  href={whatsappLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "#25D366",
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    padding: "12px 16px",
+                    borderRadius: "12px",
+                    fontWeight: 700,
+                  }}
+                >
+                  Chat on WhatsApp
+                </a>
+                <div style={{ marginTop: "8px", color: "#cbd5e1", fontSize: "14px" }}>
+                  +7 933 274 2692
+                </div>
               </div>
             </div>
           </div>
@@ -289,6 +324,33 @@ export default function App() {
           © 2026 AfroPals Jobs. All rights reserved.
         </div>
       </footer>
+
+      <a
+        href={whatsappLink}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat on WhatsApp"
+        style={{
+          position: "fixed",
+          right: "20px",
+          bottom: "20px",
+          width: "64px",
+          height: "64px",
+          borderRadius: "999px",
+          background: "#25D366",
+          color: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textDecoration: "none",
+          fontSize: "28px",
+          boxShadow: "0 12px 30px rgba(37, 211, 102, 0.35)",
+          zIndex: 1000,
+        }}
+        title="Chat with us on WhatsApp"
+      >
+        💬
+      </a>
     </div>
   );
 }
