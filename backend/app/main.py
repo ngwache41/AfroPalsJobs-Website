@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.database import Base, SessionLocal, engine
 from app.models import Job, JobApplication
-from app.schemas import JobCreate, JobRead, JobApplicationRead
+from app.schemas import JobCreate, JobRead, JobApplicationRead, JobStatusUpdate
 from app.visa_models import VisaApplication
 from app.visa_schemas import VisaApplicationRead, VisaApplicationStatusUpdate
 
@@ -149,6 +149,14 @@ def employer_me(_: dict = Depends(verify_employer_token)):
 
 @app.get("/jobs", response_model=list[JobRead])
 def list_jobs(db: Session = Depends(get_db)):
+    return db.query(Job).filter(Job.status == "approved").all()
+
+
+@app.get("/admin/jobs", response_model=list[JobRead])
+def list_all_jobs_for_admin(
+    db: Session = Depends(get_db),
+    _: dict = Depends(verify_admin_token),
+):
     return db.query(Job).all()
 
 
@@ -161,12 +169,18 @@ def get_job(job_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/jobs", response_model=JobRead)
-def create_job(payload: JobCreate, db: Session = Depends(get_db)):
+def create_job(
+    payload: JobCreate,
+    db: Session = Depends(get_db),
+    _: dict = Depends(verify_admin_token),
+):
     job = Job(
         title=payload.title,
         company=payload.company,
         location=payload.location,
         description=payload.description,
+        status="approved",
+        created_by="admin",
     )
     db.add(job)
     db.commit()
@@ -185,8 +199,27 @@ def create_employer_job(
         company=payload.company,
         location=payload.location,
         description=payload.description,
+        status="pending",
+        created_by="employer",
     )
     db.add(job)
+    db.commit()
+    db.refresh(job)
+    return job
+
+
+@app.patch("/admin/jobs/{job_id}/status", response_model=JobRead)
+def update_job_status(
+    job_id: int,
+    payload: JobStatusUpdate,
+    db: Session = Depends(get_db),
+    _: dict = Depends(verify_admin_token),
+):
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job.status = payload.status
     db.commit()
     db.refresh(job)
     return job
@@ -204,9 +237,9 @@ async def create_job_application(
     cv_file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
-    job = db.query(Job).filter(Job.id == job_id).first()
+    job = db.query(Job).filter(Job.id == job_id, Job.status == "approved").first()
     if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
+        raise HTTPException(status_code=404, detail="Approved job not found")
 
     timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
     filename = f"{timestamp}_{cv_file.filename}"
