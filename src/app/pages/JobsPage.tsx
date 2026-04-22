@@ -50,6 +50,17 @@ export default function JobsPage() {
   const [submittingApplication, setSubmittingApplication] = useState(false);
   const [applicationSuccessMessage, setApplicationSuccessMessage] = useState("");
   const [applicationErrorMessage, setApplicationErrorMessage] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth <= 900);
+    }
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   async function loadJobs() {
     try {
@@ -167,7 +178,9 @@ export default function JobsPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "minmax(320px, 420px) minmax(320px, 1fr)",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "minmax(320px, 420px) minmax(320px, 1fr)",
           gap: "24px",
         }}
       >

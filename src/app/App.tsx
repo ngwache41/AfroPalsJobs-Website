@@ -1,4 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function getLinkStyle(active: boolean): React.CSSProperties {
   return {
@@ -57,6 +58,17 @@ const contactCardStyle: React.CSSProperties = {
 
 export default function App() {
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth <= 768);
+    }
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const isHome = location.pathname === "/";
   const isJobs = location.pathname === "/jobs";
@@ -80,7 +92,7 @@ export default function App() {
           background:
             "linear-gradient(135deg, #0f172a 0%, #111827 60%, #1f2937 100%)",
           color: "#ffffff",
-          padding: "18px 24px",
+          padding: isMobile ? "16px" : "18px 24px",
           boxShadow: "0 6px 24px rgba(0,0,0,0.12)",
           position: "sticky",
           top: 0,
@@ -92,13 +104,13 @@ export default function App() {
             maxWidth: "1200px",
             margin: "0 auto",
             display: "flex",
+            flexDirection: isMobile ? "column" : "row",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: isMobile ? "flex-start" : "center",
             gap: "16px",
-            flexWrap: "wrap",
           }}
         >
-          <div style={{ minWidth: "220px" }}>
+          <div style={{ minWidth: isMobile ? "100%" : "220px" }}>
             <Link
               to="/"
               style={{
@@ -109,7 +121,7 @@ export default function App() {
             >
               <div
                 style={{
-                  fontSize: "24px",
+                  fontSize: isMobile ? "20px" : "24px",
                   fontWeight: 700,
                   marginBottom: "4px",
                 }}
@@ -121,7 +133,7 @@ export default function App() {
             <div
               style={{
                 color: "rgba(255,255,255,0.78)",
-                fontSize: "14px",
+                fontSize: isMobile ? "13px" : "14px",
               }}
             >
               Jobs, visa support, and invitation applications
@@ -134,7 +146,8 @@ export default function App() {
               alignItems: "center",
               gap: "12px",
               flexWrap: "wrap",
-              justifyContent: "flex-end",
+              justifyContent: isMobile ? "flex-start" : "flex-end",
+              width: isMobile ? "100%" : "auto",
             }}
           >
             <Link to="/" style={getLinkStyle(isHome)}>
@@ -199,16 +212,16 @@ export default function App() {
           style={{
             maxWidth: "1200px",
             margin: "0 auto",
-            padding: "42px 24px",
+            padding: isMobile ? "32px 16px" : "42px 24px",
             display: "grid",
-            gridTemplateColumns: "1.2fr 1fr 1.2fr",
+            gridTemplateColumns: isMobile ? "1fr" : "1.2fr 1fr 1.2fr",
             gap: "24px",
           }}
         >
           <div>
             <div
               style={{
-                fontSize: "24px",
+                fontSize: isMobile ? "22px" : "24px",
                 fontWeight: 700,
                 marginBottom: "12px",
                 color: "#ffffff",
@@ -250,7 +263,7 @@ export default function App() {
             </div>
           </div>
 
-          <div>
+          <div id="contact">
             <div style={footerTitleStyle}>Contact</div>
 
             <div style={{ display: "grid", gap: "12px" }}>
@@ -268,7 +281,12 @@ export default function App() {
                   href="https://www.afropalsjobs.ru"
                   target="_blank"
                   rel="noreferrer"
-                  style={{ ...footerLinkStyle, color: "#ffffff", fontWeight: 600 }}
+                  style={{
+                    ...footerLinkStyle,
+                    color: "#ffffff",
+                    fontWeight: 600,
+                    wordBreak: "break-word",
+                  }}
                 >
                   www.afropalsjobs.ru
                 </a>
@@ -285,10 +303,16 @@ export default function App() {
                   EMAILS
                 </div>
                 <div style={{ display: "grid", gap: "4px" }}>
-                  <a href="mailto:info@afropalsjobs.ru" style={footerLinkStyle}>
+                  <a
+                    href="mailto:info@afropalsjobs.ru"
+                    style={{ ...footerLinkStyle, wordBreak: "break-word" }}
+                  >
                     info@afropalsjobs.ru
                   </a>
-                  <a href="mailto:afropalsjobs@yandex.ru" style={footerLinkStyle}>
+                  <a
+                    href="mailto:afropalsjobs@yandex.ru"
+                    style={{ ...footerLinkStyle, wordBreak: "break-word" }}
+                  >
                     afropalsjobs@yandex.ru
                   </a>
                 </div>
@@ -318,6 +342,8 @@ export default function App() {
                     padding: "12px 16px",
                     borderRadius: "12px",
                     fontWeight: 700,
+                    width: isMobile ? "100%" : "auto",
+                    boxSizing: "border-box",
                   }}
                 >
                   Chat on WhatsApp
@@ -356,10 +382,10 @@ export default function App() {
         aria-label="Chat on WhatsApp"
         style={{
           position: "fixed",
-          right: "20px",
-          bottom: "20px",
-          width: "64px",
-          height: "64px",
+          right: isMobile ? "16px" : "20px",
+          bottom: isMobile ? "16px" : "20px",
+          width: isMobile ? "58px" : "64px",
+          height: isMobile ? "58px" : "64px",
           borderRadius: "999px",
           background: "#25D366",
           color: "#ffffff",
@@ -367,7 +393,7 @@ export default function App() {
           alignItems: "center",
           justifyContent: "center",
           textDecoration: "none",
-          fontSize: "28px",
+          fontSize: isMobile ? "24px" : "28px",
           boxShadow: "0 12px 30px rgba(37, 211, 102, 0.35)",
           zIndex: 1000,
         }}
