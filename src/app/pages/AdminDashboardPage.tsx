@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   clearAdminToken,
-  getJobs,
+  getAdminJobs,
   getJobApplications,
   getVisaApplications,
   isAdminLoggedIn,
+  updateJobStatus,
   updateVisaApplicationStatus,
   Job,
   JobApplication,
@@ -29,7 +30,8 @@ export default function AdminDashboardPage() {
   const [visaApplications, setVisaApplications] = useState<VisaApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [updatingVisaId, setUpdatingVisaId] = useState<number | null>(null);
+  const [updatingJobId, setUpdatingJobId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isAdminLoggedIn()) {
@@ -45,7 +47,7 @@ export default function AdminDashboardPage() {
       setErrorMessage("");
 
       const [jobsData, jobApplicationsData, visaData] = await Promise.all([
-        getJobs(),
+        getAdminJobs(),
         getJobApplications(),
         getVisaApplications(),
       ]);
@@ -61,16 +63,29 @@ export default function AdminDashboardPage() {
     }
   }
 
-  async function handleStatusUpdate(applicationId: number, status: string) {
+  async function handleVisaStatusUpdate(applicationId: number, status: string) {
     try {
-      setUpdatingId(applicationId);
+      setUpdatingVisaId(applicationId);
       await updateVisaApplicationStatus(applicationId, status);
       await loadDashboardData();
     } catch (error) {
       console.error(error);
       setErrorMessage("Failed to update visa application status.");
     } finally {
-      setUpdatingId(null);
+      setUpdatingVisaId(null);
+    }
+  }
+
+  async function handleJobStatusUpdate(jobId: number, status: string) {
+    try {
+      setUpdatingJobId(jobId);
+      await updateJobStatus(jobId, status);
+      await loadDashboardData();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Failed to update job status.");
+    } finally {
+      setUpdatingJobId(null);
     }
   }
 
@@ -199,7 +214,7 @@ export default function AdminDashboardPage() {
             Jobs
           </h2>
           <p style={{ ...typography.body, marginTop: 0 }}>
-            Submitted job listings available on the platform.
+            Review all submitted jobs and approve or reject employer postings.
           </p>
 
           {loading ? (
@@ -210,16 +225,81 @@ export default function AdminDashboardPage() {
             <div style={{ display: "grid", gap: "16px" }}>
               {jobs.map((job) => (
                 <div key={job.id} style={{ ...ui.softCard, padding: "20px" }}>
-                  <h3 style={{ ...typography.cardTitle, margin: "0 0 10px 0" }}>
-                    {job.title}
-                  </h3>
-                  <p style={{ margin: "0 0 8px 0" }}>
-                    <strong>Company:</strong> {job.company}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: "16px",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                      marginBottom: "14px",
+                    }}
+                  >
+                    <div>
+                      <h3 style={{ ...typography.cardTitle, margin: "0 0 8px 0" }}>
+                        {job.title}
+                      </h3>
+                      <div style={{ ...typography.body, lineHeight: 1.8 }}>
+                        <div>
+                          <strong>Company:</strong> {job.company}
+                        </div>
+                        <div>
+                          <strong>Location:</strong> {job.location}
+                        </div>
+                        <div>
+                          <strong>Created By:</strong> {job.created_by}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={statusBadge(job.status)}>{job.status}</div>
+                  </div>
+
+                  <p style={{ ...typography.body, margin: "0 0 16px 0" }}>
+                    {job.description}
                   </p>
-                  <p style={{ margin: "0 0 12px 0" }}>
-                    <strong>Location:</strong> {job.location}
-                  </p>
-                  <p style={{ ...typography.body, margin: 0 }}>{job.description}</p>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <button
+                      style={{
+                        ...actionButtonStyle,
+                        background: "#dcfce7",
+                        border: "1px solid #86efac",
+                        color: "#166534",
+                      }}
+                      onClick={() => handleJobStatusUpdate(job.id, "approved")}
+                      disabled={updatingJobId === job.id}
+                    >
+                      {updatingJobId === job.id ? "Updating..." : "Approve"}
+                    </button>
+
+                    <button
+                      style={{
+                        ...actionButtonStyle,
+                        background: "#fee2e2",
+                        border: "1px solid #fca5a5",
+                        color: "#991b1b",
+                      }}
+                      onClick={() => handleJobStatusUpdate(job.id, "rejected")}
+                      disabled={updatingJobId === job.id}
+                    >
+                      {updatingJobId === job.id ? "Updating..." : "Reject"}
+                    </button>
+
+                    <button
+                      style={actionButtonStyle}
+                      onClick={() => handleJobStatusUpdate(job.id, "pending")}
+                      disabled={updatingJobId === job.id}
+                    >
+                      {updatingJobId === job.id ? "Updating..." : "Mark Pending"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -405,10 +485,10 @@ export default function AdminDashboardPage() {
                   >
                     <button
                       style={actionButtonStyle}
-                      onClick={() => handleStatusUpdate(application.id, "pending")}
-                      disabled={updatingId === application.id}
+                      onClick={() => handleVisaStatusUpdate(application.id, "pending")}
+                      disabled={updatingVisaId === application.id}
                     >
-                      {updatingId === application.id ? "Updating..." : "Mark Pending"}
+                      {updatingVisaId === application.id ? "Updating..." : "Mark Pending"}
                     </button>
 
                     <button
@@ -418,10 +498,10 @@ export default function AdminDashboardPage() {
                         border: "1px solid #86efac",
                         color: "#166534",
                       }}
-                      onClick={() => handleStatusUpdate(application.id, "approved")}
-                      disabled={updatingId === application.id}
+                      onClick={() => handleVisaStatusUpdate(application.id, "approved")}
+                      disabled={updatingVisaId === application.id}
                     >
-                      {updatingId === application.id ? "Updating..." : "Approve"}
+                      {updatingVisaId === application.id ? "Updating..." : "Approve"}
                     </button>
 
                     <button
@@ -431,10 +511,10 @@ export default function AdminDashboardPage() {
                         border: "1px solid #fca5a5",
                         color: "#991b1b",
                       }}
-                      onClick={() => handleStatusUpdate(application.id, "rejected")}
-                      disabled={updatingId === application.id}
+                      onClick={() => handleVisaStatusUpdate(application.id, "rejected")}
+                      disabled={updatingVisaId === application.id}
                     >
-                      {updatingId === application.id ? "Updating..." : "Reject"}
+                      {updatingVisaId === application.id ? "Updating..." : "Reject"}
                     </button>
                   </div>
                 </div>
