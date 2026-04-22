@@ -9,6 +9,8 @@ export type Job = {
   company: string;
   location: string;
   description: string;
+  status: string;
+  created_by: string;
 };
 
 export type VisaApplication = {
@@ -53,11 +55,33 @@ export async function getJobs(): Promise<Job[]> {
   return response.json();
 }
 
-export async function createJob(payload: Omit<Job, "id">): Promise<Job> {
+// ================= ADMIN JOBS =================
+
+export async function getAdminJobs(): Promise<Job[]> {
+  const token = localStorage.getItem("admin_token");
+
+  const response = await fetch(`${API_BASE_URL}/admin/jobs`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to fetch admin jobs: ${response.status} ${text}`);
+  }
+
+  return response.json();
+}
+
+export async function createJob(payload: Omit<Job, "id" | "status" | "created_by">): Promise<Job> {
+  const token = localStorage.getItem("admin_token");
+
   const response = await fetch(`${API_BASE_URL}/jobs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(payload),
   });
@@ -65,6 +89,26 @@ export async function createJob(payload: Omit<Job, "id">): Promise<Job> {
   if (!response.ok) {
     const text = await response.text();
     throw new Error(`Failed to create job: ${response.status} ${text}`);
+  }
+
+  return response.json();
+}
+
+export async function updateJobStatus(jobId: number, status: string): Promise<Job> {
+  const token = localStorage.getItem("admin_token");
+
+  const response = await fetch(`${API_BASE_URL}/admin/jobs/${jobId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to update job status: ${response.status} ${text}`);
   }
 
   return response.json();
@@ -232,7 +276,7 @@ export async function getEmployerMe() {
 // ================= EMPLOYER JOBS =================
 
 export async function createEmployerJob(
-  payload: Omit<Job, "id">
+  payload: Omit<Job, "id" | "status" | "created_by">
 ): Promise<Job> {
   const token = localStorage.getItem("employer_token");
 
