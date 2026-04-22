@@ -14,10 +14,7 @@ from app.database import Base, SessionLocal, engine
 from app.models import Job
 from app.schemas import JobCreate, JobRead
 from app.visa_models import VisaApplication
-from app.visa_schemas import (
-    VisaApplicationRead,
-    VisaApplicationStatusUpdate,
-)
+from app.visa_schemas import VisaApplicationRead, VisaApplicationStatusUpdate
 
 app = FastAPI(title="AfroPals Jobs API")
 
@@ -116,6 +113,8 @@ def root():
     return {"message": "API is running"}
 
 
+# ================= ADMIN AUTH =================
+
 @app.post("/admin/login", response_model=LoginResponse)
 def admin_login(payload: LoginRequest):
     if payload.username != admin_username or payload.password != admin_password:
@@ -130,6 +129,8 @@ def admin_me(_: dict = Depends(verify_admin_token)):
     return {"message": "Authenticated admin"}
 
 
+# ================= EMPLOYER AUTH =================
+
 @app.post("/employer/login", response_model=LoginResponse)
 def employer_login(payload: LoginRequest):
     if payload.username != employer_username or payload.password != employer_password:
@@ -143,6 +144,8 @@ def employer_login(payload: LoginRequest):
 def employer_me(_: dict = Depends(verify_employer_token)):
     return {"message": "Authenticated employer"}
 
+
+# ================= JOBS =================
 
 @app.get("/jobs", response_model=list[JobRead])
 def list_jobs(db: Session = Depends(get_db)):
@@ -188,6 +191,8 @@ def create_employer_job(
     db.refresh(job)
     return job
 
+
+# ================= VISA =================
 
 @app.post("/visa-applications")
 async def create_visa_application(
@@ -240,7 +245,7 @@ async def create_visa_application(
 
     return {
         "message": "Application submitted",
-        "file_url": f"/uploads/{filename}"
+        "file_url": f"/uploads/{filename}",
     }
 
 
