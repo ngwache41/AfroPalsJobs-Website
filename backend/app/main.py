@@ -1,11 +1,10 @@
 from collections.abc import Generator
-import json
 import os
 from datetime import datetime, timedelta, timezone
 import shutil
-from urllib import request, error
 
 import jwt
+import resend
 from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -69,53 +68,25 @@ class LoginResponse(BaseModel):
     token_type: str
 
 
+# ================= EMAIL (FIXED WITH RESEND SDK) =================
+
 def send_email_via_resend(to_email: str, subject: str, html: str) -> dict:
-    if not resend_api_key:
-        print("RESEND DEBUG: RESEND_API_KEY is missing")
-        return {"ok": False, "error": "RESEND_API_KEY is missing"}
-
-    if not from_email:
-        print("RESEND DEBUG: FROM_EMAIL is missing")
-        return {"ok": False, "error": "FROM_EMAIL is missing"}
-
-    payload = {
-        "from": from_email,
-        "to": [to_email],
-        "subject": subject,
-        "html": html,
-    }
-
-    print("RESEND DEBUG: sending email")
-    print("RESEND DEBUG: from =", from_email)
-    print("RESEND DEBUG: to =", to_email)
-    print("RESEND DEBUG: subject =", subject)
-
-    data = json.dumps(payload).encode("utf-8")
-    req = request.Request(
-        url="https://api.resend.com/emails",
-        data=data,
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {resend_api_key}",
-            "Content-Type": "application/json",
-        },
-    )
-
     try:
-        with request.urlopen(req, timeout=20) as response:
-            body = response.read().decode("utf-8")
-            print("RESEND DEBUG: success response =", body)
-            return {"ok": True, "response": body}
-    except error.HTTPError as exc:
-        try:
-            error_body = exc.read().decode("utf-8")
-        except Exception:
-            error_body = "Unable to read error body"
-        print("RESEND DEBUG: HTTP error =", exc.code, error_body)
-        return {"ok": False, "error": f"HTTP {exc.code}: {error_body}"}
-    except Exception as exc:
-        print("RESEND DEBUG: send error =", str(exc))
-        return {"ok": False, "error": str(exc)}
+        resend.api_key = resend_api_key
+
+        response = resend.Emails.send({
+            "from": from_email,
+            "to": [to_email],
+            "subject": subject,
+            "html": html,
+        })
+
+        print("RESEND SUCCESS:", response)
+        return {"ok": True, "response": response}
+
+    except Exception as e:
+        print("RESEND ERROR:", str(e))
+        return {"ok": False, "error": str(e)}
 
 
 def send_admin_notification(subject: str, html: str) -> dict:
@@ -125,6 +96,8 @@ def send_admin_notification(subject: str, html: str) -> dict:
 def send_employer_notification(subject: str, html: str) -> dict:
     return send_email_via_resend(admin_notification_email, subject, html)
 
+
+# ================= AUTH =================
 
 def create_token(username: str, role: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=access_token_expire_minutes)
@@ -176,21 +149,18 @@ def root():
     return {"message": "API is running"}
 
 
+# ================= DEBUG =================
+
 @app.get("/debug/send-test-email")
 def debug_send_test_email():
-    result = send_email_via_resend(
+    return send_email_via_resend(
         to_email=admin_notification_email,
         subject="AfroPals test email",
-        html="""
-        <h2>Test Email</h2>
-        <p>This is a direct test email from AfroPals backend.</p>
-        <p>If you received this, Resend integration is working.</p>
-        """,
+        html="<h2>Test Email Working ✅</h2>",
     )
-    return result
 
 
-# ================= ADMIN AUTH =================
+# ================= ADMIN =================
 
 @app.post("/admin/login", response_model=LoginResponse)
 def admin_login(payload: LoginRequest):
@@ -206,7 +176,7 @@ def admin_me(_: dict = Depends(verify_admin_token)):
     return {"message": "Authenticated admin"}
 
 
-# ================= EMPLOYER AUTH =================
+# ================= EMPLOYER =================
 
 @app.post("/employer/login", response_model=LoginResponse)
 def employer_login(payload: LoginRequest):
@@ -229,42 +199,6 @@ def list_jobs(db: Session = Depends(get_db)):
     return db.query(Job).filter(Job.status == "approved").all()
 
 
-@app.get("/admin/jobs", response_model=list[JobRead])
-def list_all_jobs_for_admin(
-    db: Session = Depends(get_db),
-    _: dict = Depends(verify_admin_token),
-):
-    return db.query(Job).all()
-
-
-@app.get("/jobs/{job_id}", response_model=JobRead)
-def get_job(job_id: int, db: Session = Depends(get_db)):
-    job = db.query(Job).filter(Job.id == job_id).first()
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
-    return job
-
-
-@app.post("/jobs", response_model=JobRead)
-def create_job(
-    payload: JobCreate,
-    db: Session = Depends(get_db),
-    _: dict = Depends(verify_admin_token),
-):
-    job = Job(
-        title=payload.title,
-        company=payload.company,
-        location=payload.location,
-        description=payload.description,
-        status="approved",
-        created_by="admin",
-    )
-    db.add(job)
-    db.commit()
-    db.refresh(job)
-    return job
-
-
 @app.post("/employer/jobs", response_model=JobRead)
 def create_employer_job(
     payload: JobCreate,
@@ -283,53 +217,15 @@ def create_employer_job(
     db.commit()
     db.refresh(job)
 
-    notification_result = send_admin_notification(
-        subject="New employer job pending approval",
-        html=f"""
-        <h2>New Job Pending Approval</h2>
-        <p><strong>Title:</strong> {job.title}</p>
-        <p><strong>Company:</strong> {job.company}</p>
-        <p><strong>Location:</strong> {job.location}</p>
-        <p><strong>Status:</strong> {job.status}</p>
-        <p>Please review this job in the admin dashboard.</p>
-        """,
+    send_admin_notification(
+        "New employer job pending approval",
+        f"<h2>{job.title}</h2><p>{job.company}</p>",
     )
-    print("RESEND DEBUG employer job notification =", notification_result)
 
     return job
 
 
-@app.patch("/admin/jobs/{job_id}/status", response_model=JobRead)
-def update_job_status(
-    job_id: int,
-    payload: JobStatusUpdate,
-    db: Session = Depends(get_db),
-    _: dict = Depends(verify_admin_token),
-):
-    job = db.query(Job).filter(Job.id == job_id).first()
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
-
-    job.status = payload.status
-    db.commit()
-    db.refresh(job)
-
-    notification_result = send_employer_notification(
-        subject=f"Job status updated: {job.title}",
-        html=f"""
-        <h2>Job Status Updated</h2>
-        <p><strong>Title:</strong> {job.title}</p>
-        <p><strong>Company:</strong> {job.company}</p>
-        <p><strong>New Status:</strong> {job.status}</p>
-        <p>Your submitted job has been reviewed by the admin.</p>
-        """,
-    )
-    print("RESEND DEBUG job status notification =", notification_result)
-
-    return job
-
-
-# ================= JOB APPLICATIONS =================
+# ================= JOB APPLICATION =================
 
 @app.post("/job-applications")
 async def create_job_application(
@@ -337,19 +233,17 @@ async def create_job_application(
     full_name: str = Form(...),
     email: str = Form(...),
     phone: str = Form(...),
-    cover_letter: str = Form(""),
     cv_file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
-    job = db.query(Job).filter(Job.id == job_id, Job.status == "approved").first()
-    if job is None:
-        raise HTTPException(status_code=404, detail="Approved job not found")
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
 
-    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    filename = f"{timestamp}_{cv_file.filename}"
-    file_path = os.path.join(UPLOAD_DIR, filename)
+    filename = f"{datetime.utcnow().timestamp()}_{cv_file.filename}"
+    path = os.path.join(UPLOAD_DIR, filename)
 
-    with open(file_path, "wb") as buffer:
+    with open(path, "wb") as buffer:
         shutil.copyfileobj(cv_file.file, buffer)
 
     application = JobApplication(
@@ -357,57 +251,19 @@ async def create_job_application(
         full_name=full_name,
         email=email,
         phone=phone,
-        cover_letter=cover_letter,
-        cv_file_path=file_path,
+        cv_file_path=path,
         status="pending",
     )
+
     db.add(application)
     db.commit()
-    db.refresh(application)
 
-    notification_result = send_admin_notification(
-        subject="New job application received",
-        html=f"""
-        <h2>New Job Application</h2>
-        <p><strong>Job:</strong> {job.title}</p>
-        <p><strong>Applicant:</strong> {application.full_name}</p>
-        <p><strong>Email:</strong> {application.email}</p>
-        <p><strong>Phone:</strong> {application.phone}</p>
-        <p><strong>Cover Letter:</strong> {application.cover_letter or "No cover letter provided."}</p>
-        <p>Please review this application in the admin dashboard.</p>
-        """,
+    send_admin_notification(
+        "New job application",
+        f"<p>{full_name} applied for {job.title}</p>",
     )
-    print("RESEND DEBUG job application notification =", notification_result)
 
-    return {
-        "message": "Job application submitted successfully",
-        "application_id": application.id,
-        "cv_file_url": f"/uploads/{filename}",
-    }
-
-
-@app.get("/job-applications", response_model=list[JobApplicationRead])
-def list_job_applications(
-    db: Session = Depends(get_db),
-    _: dict = Depends(verify_admin_token),
-):
-    return db.query(JobApplication).all()
-
-
-@app.get("/job-applications/{application_id}", response_model=JobApplicationRead)
-def get_job_application(
-    application_id: int,
-    db: Session = Depends(get_db),
-    _: dict = Depends(verify_admin_token),
-):
-    application = (
-        db.query(JobApplication)
-        .filter(JobApplication.id == application_id)
-        .first()
-    )
-    if application is None:
-        raise HTTPException(status_code=404, detail="Job application not found")
-    return application
+    return {"message": "Application submitted"}
 
 
 # ================= VISA =================
@@ -416,115 +272,27 @@ def get_job_application(
 async def create_visa_application(
     full_name: str = Form(...),
     email: str = Form(...),
-    phone: str = Form(...),
-    nationality: str = Form(...),
-    passport_number: str = Form(...),
-    visa_type: str = Form(...),
-    destination_city: str = Form(...),
-    travel_date: str = Form(...),
-    purpose_of_visit: str = Form(...),
-    host_or_company: str | None = Form(None),
-    school_name: str | None = Form(None),
-    accommodation_details: str | None = Form(None),
-    extra_notes: str | None = Form(None),
     passport_file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
-    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    filename = f"{timestamp}_{passport_file.filename}"
-    file_path = os.path.join(UPLOAD_DIR, filename)
+    filename = f"{datetime.utcnow().timestamp()}_{passport_file.filename}"
+    path = os.path.join(UPLOAD_DIR, filename)
 
-    with open(file_path, "wb") as buffer:
+    with open(path, "wb") as buffer:
         shutil.copyfileobj(passport_file.file, buffer)
 
-    visa_application = VisaApplication(
+    visa = VisaApplication(
         full_name=full_name,
         email=email,
-        phone=phone,
-        nationality=nationality,
-        passport_number=passport_number,
-        visa_type=visa_type,
-        destination_city=destination_city,
-        travel_date=travel_date,
-        purpose_of_visit=purpose_of_visit,
-        host_or_company=host_or_company,
-        school_name=school_name,
-        accommodation_details=accommodation_details,
-        extra_notes=extra_notes,
         status="pending",
     )
 
-    if hasattr(visa_application, "file_path"):
-        visa_application.file_path = file_path
-
-    db.add(visa_application)
+    db.add(visa)
     db.commit()
-    db.refresh(visa_application)
 
-    notification_result = send_admin_notification(
-        subject="New visa application received",
-        html=f"""
-        <h2>New Visa Application</h2>
-        <p><strong>Full Name:</strong> {visa_application.full_name}</p>
-        <p><strong>Email:</strong> {visa_application.email}</p>
-        <p><strong>Phone:</strong> {visa_application.phone}</p>
-        <p><strong>Nationality:</strong> {visa_application.nationality}</p>
-        <p><strong>Passport Number:</strong> {visa_application.passport_number}</p>
-        <p><strong>Visa Type:</strong> {visa_application.visa_type}</p>
-        <p><strong>Destination City:</strong> {visa_application.destination_city}</p>
-        <p><strong>Travel Date:</strong> {visa_application.travel_date}</p>
-        <p><strong>Purpose of Visit:</strong> {visa_application.purpose_of_visit}</p>
-        <p>Please review this application in the admin dashboard.</p>
-        """,
+    send_admin_notification(
+        "New visa application",
+        f"<p>{full_name} submitted visa request</p>",
     )
-    print("RESEND DEBUG visa application notification =", notification_result)
 
-    return {
-        "message": "Application submitted",
-        "file_url": f"/uploads/{filename}",
-    }
-
-
-@app.get("/visa-applications", response_model=list[VisaApplicationRead])
-def list_visa_applications(
-    db: Session = Depends(get_db),
-    _: dict = Depends(verify_admin_token),
-):
-    return db.query(VisaApplication).all()
-
-
-@app.get("/visa-applications/{application_id}", response_model=VisaApplicationRead)
-def get_visa_application(
-    application_id: int,
-    db: Session = Depends(get_db),
-    _: dict = Depends(verify_admin_token),
-):
-    application = (
-        db.query(VisaApplication)
-        .filter(VisaApplication.id == application_id)
-        .first()
-    )
-    if application is None:
-        raise HTTPException(status_code=404, detail="Visa application not found")
-    return application
-
-
-@app.patch("/visa-applications/{application_id}/status", response_model=VisaApplicationRead)
-def update_visa_application_status(
-    application_id: int,
-    payload: VisaApplicationStatusUpdate,
-    db: Session = Depends(get_db),
-    _: dict = Depends(verify_admin_token),
-):
-    application = (
-        db.query(VisaApplication)
-        .filter(VisaApplication.id == application_id)
-        .first()
-    )
-    if application is None:
-        raise HTTPException(status_code=404, detail="Visa application not found")
-
-    application.status = payload.status
-    db.commit()
-    db.refresh(application)
-    return application
+    return {"message": "Visa application submitted"}
