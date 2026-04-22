@@ -4,3 +4,4 @@ pydantic-settings
 sqlalchemy
 python-dotenv
 PyJWT
+python-multipart
