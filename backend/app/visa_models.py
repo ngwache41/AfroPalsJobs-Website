@@ -19,9 +19,11 @@ class VisaApplication(Base):
     travel_date: Mapped[str] = mapped_column(String(100), nullable=False)
     purpose_of_visit: Mapped[str] = mapped_column(Text, nullable=False)
 
-    host_or_company: Mapped[str] = mapped_column(String(255), nullable=True)
-    school_name: Mapped[str] = mapped_column(String(255), nullable=True)
-    accommodation_details: Mapped[str] = mapped_column(Text, nullable=True)
-    extra_notes: Mapped[str] = mapped_column(Text, nullable=True)
+    host_or_company: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    school_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    accommodation_details: Mapped[str | None] = mapped_column(Text, nullable=True)
+    extra_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    passport_file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")

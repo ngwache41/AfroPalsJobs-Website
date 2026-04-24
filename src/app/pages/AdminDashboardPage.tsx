@@ -23,6 +23,11 @@ const actionButtonStyle: React.CSSProperties = {
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
+function buildFileUrl(path?: string | null) {
+  if (!path) return "";
+  return `${API_BASE_URL}/${path.replace(/\\/g, "/")}`;
+}
+
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -38,6 +43,7 @@ export default function AdminDashboardPage() {
       setLoading(false);
       return;
     }
+
     loadDashboardData();
   }, []);
 
@@ -259,13 +265,7 @@ export default function AdminDashboardPage() {
                     {job.description}
                   </p>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      flexWrap: "wrap",
-                    }}
-                  >
+                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                     <button
                       style={{
                         ...actionButtonStyle,
@@ -363,7 +363,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <a
-                    href={`${API_BASE_URL}/${application.cv_file_path.replace(/\\/g, "/")}`}
+                    href={buildFileUrl(application.cv_file_path)}
                     target="_blank"
                     rel="noreferrer"
                     style={{
@@ -385,7 +385,7 @@ export default function AdminDashboardPage() {
             Visa Applications
           </h2>
           <p style={{ ...typography.body, marginTop: 0 }}>
-            Review applications and update their status.
+            Review applications, uploaded passport files, and update their status.
           </p>
 
           {loading ? (
@@ -472,6 +472,23 @@ export default function AdminDashboardPage() {
                         <strong style={{ color: "#111827" }}>Extra Notes:</strong>{" "}
                         {application.extra_notes}
                       </div>
+                    )}
+
+                    {application.passport_file_path && (
+                      <a
+                        href={buildFileUrl(application.passport_file_path)}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          ...ui.primaryButton,
+                          display: "inline-block",
+                          textDecoration: "none",
+                          marginTop: "8px",
+                          width: "fit-content",
+                        }}
+                      >
+                        View Uploaded Passport File
+                      </a>
                     )}
                   </div>
 
