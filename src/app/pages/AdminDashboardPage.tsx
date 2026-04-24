@@ -25,6 +25,11 @@ const API_BASE_URL =
 
 function buildFileUrl(path?: string | null) {
   if (!path) return "";
+
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+
   return `${API_BASE_URL}/${path.replace(/\\/g, "/")}`;
 }
 

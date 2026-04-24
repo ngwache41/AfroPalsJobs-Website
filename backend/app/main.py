@@ -1,15 +1,15 @@
 from collections.abc import Generator
 import os
 from datetime import datetime, timedelta, timezone
-import shutil
 import time
 from pathlib import Path
 
+import cloudinary
+import cloudinary.uploader
 import jwt
 import resend
 from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -22,11 +22,8 @@ from app.visa_schemas import VisaApplicationRead, VisaApplicationStatusUpdate
 
 app = FastAPI(title="AfroPals Jobs API")
 
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
 frontend_url = os.getenv("FRONTEND_URL", "https://afropalsjobs.ru")
+backend_url = os.getenv("BACKEND_URL", "https://afropals-backend.onrender.com")
 secret_key = os.getenv("SECRET_KEY", "supersecretkey")
 
 admin_username = os.getenv("ADMIN_USERNAME", "admin")
@@ -40,6 +37,17 @@ access_token_expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
 resend_api_key = os.getenv("RESEND_API_KEY", "")
 from_email = os.getenv("FROM_EMAIL", "info@afropalsjobs.ru")
 admin_notification_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "afropalsjobs@yandex.ru")
+
+cloudinary_cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+cloudinary_api_key = os.getenv("CLOUDINARY_API_KEY", "")
+cloudinary_api_secret = os.getenv("CLOUDINARY_API_SECRET", "")
+
+cloudinary.config(
+    cloud_name=cloudinary_cloud_name,
+    api_key=cloudinary_api_key,
+    api_secret=cloudinary_api_secret,
+    secure=True,
+)
 
 origins = [
     frontend_url,
@@ -142,11 +150,11 @@ def safe_upload_filename(original_filename: str) -> str:
     return f"{timestamp}_{safe_stem}{suffix}"
 
 
-async def validate_and_save_upload(
+async def validate_upload_file(
     upload_file: UploadFile,
     allowed_extensions: set[str],
     label: str,
-) -> tuple[str, str]:
+) -> str:
     filename = safe_upload_filename(upload_file.filename or "")
     extension = Path(filename).suffix.lower()
 
@@ -157,31 +165,56 @@ async def validate_and_save_upload(
             detail=f"Invalid {label} file type. Allowed file types: {allowed}",
         )
 
-    file_path = os.path.join(UPLOAD_DIR, filename)
-
-    total_size = 0
-    with open(file_path, "wb") as buffer:
-        while True:
-            chunk = await upload_file.read(1024 * 1024)
-            if not chunk:
-                break
-
-            total_size += len(chunk)
-            if total_size > MAX_UPLOAD_SIZE_BYTES:
-                buffer.close()
-                try:
-                    os.remove(file_path)
-                except FileNotFoundError:
-                    pass
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"{label.capitalize()} file is too large. Maximum size is 8MB.",
-                )
-
-            buffer.write(chunk)
-
+    file_bytes = await upload_file.read()
     await upload_file.close()
-    return file_path, f"/uploads/{filename}"
+
+    if len(file_bytes) > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{label.capitalize()} file is too large. Maximum size is 8MB.",
+        )
+
+    return filename
+
+
+async def upload_to_cloudinary(
+    upload_file: UploadFile,
+    allowed_extensions: set[str],
+    label: str,
+    folder: str,
+) -> str:
+    if not cloudinary_cloud_name or not cloudinary_api_key or not cloudinary_api_secret:
+        raise HTTPException(
+            status_code=500,
+            detail="Cloudinary is not configured on the backend.",
+        )
+
+    filename = await validate_upload_file(upload_file, allowed_extensions, label)
+
+    await upload_file.seek(0)
+
+    try:
+        result = cloudinary.uploader.upload(
+            upload_file.file,
+            folder=folder,
+            resource_type="auto",
+            public_id=Path(filename).stem,
+            overwrite=False,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to upload {label} file to cloud storage: {str(exc)}",
+        )
+
+    secure_url = result.get("secure_url")
+    if not secure_url:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Cloudinary did not return a secure URL for the {label} file.",
+        )
+
+    return secure_url
 
 
 def build_email_layout(title: str, body_html: str) -> str:
@@ -460,10 +493,11 @@ async def create_job_application(
     if job is None:
         raise HTTPException(status_code=404, detail="Approved job not found")
 
-    file_path, file_url = await validate_and_save_upload(
+    file_url = await upload_to_cloudinary(
         cv_file,
         ALLOWED_CV_EXTENSIONS,
         "CV",
+        "afropals_jobs/cv_uploads",
     )
 
     application = JobApplication(
@@ -472,7 +506,7 @@ async def create_job_application(
         email=email,
         phone=phone,
         cover_letter=cover_letter,
-        cv_file_path=file_path,
+        cv_file_path=file_url,
         status="pending",
     )
     db.add(application)
@@ -487,7 +521,7 @@ async def create_job_application(
         <p><strong>Email:</strong> {application.email}</p>
         <p><strong>Phone:</strong> {application.phone}</p>
         <p><strong>Cover Letter:</strong> {application.cover_letter or "No cover letter provided."}</p>
-        <p><a href="https://afropals-backend.onrender.com/{file_path}">View uploaded CV</a></p>
+        <p><a href="{file_url}">View uploaded CV</a></p>
         """
     )
     send_admin_notification(
@@ -561,10 +595,11 @@ async def create_visa_application(
 ):
     check_rate_limit(request, "visa_application")
 
-    file_path, file_url = await validate_and_save_upload(
+    file_url = await upload_to_cloudinary(
         passport_file,
         ALLOWED_PASSPORT_EXTENSIONS,
         "passport",
+        "afropals_jobs/passport_uploads",
     )
 
     visa_application = VisaApplication(
@@ -581,7 +616,7 @@ async def create_visa_application(
         school_name=school_name,
         accommodation_details=accommodation_details,
         extra_notes=extra_notes,
-        passport_file_path=file_path,
+        passport_file_path=file_url,
         status="pending",
     )
 
@@ -601,7 +636,7 @@ async def create_visa_application(
         <p><strong>Destination City:</strong> {visa_application.destination_city}</p>
         <p><strong>Travel Date:</strong> {visa_application.travel_date}</p>
         <p><strong>Purpose of Visit:</strong> {visa_application.purpose_of_visit}</p>
-        <p><a href="https://afropals-backend.onrender.com/{file_path}">View uploaded passport file</a></p>
+        <p><a href="{file_url}">View uploaded passport file</a></p>
         """
     )
     send_admin_notification(
