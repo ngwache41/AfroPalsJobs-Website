@@ -36,27 +36,61 @@ const initialForm: VisaFormState = {
 
 export default function VisaApplicationPage() {
   const [form, setForm] = useState<VisaFormState>(initialForm);
+  const [passportFile, setPassportFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  function updateField<K extends keyof VisaFormState>(key: K, value: VisaFormState[K]) {
+  function updateField<K extends keyof VisaFormState>(
+    key: K,
+    value: VisaFormState[K]
+  ) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setSubmitting(true);
     setSuccessMessage("");
     setErrorMessage("");
 
+    if (!passportFile) {
+      setSubmitting(false);
+      setErrorMessage("Please upload your passport file.");
+      return;
+    }
+
     try {
-      await createVisaApplication(form);
+      const formData = new FormData();
+
+      formData.append("full_name", form.full_name);
+      formData.append("email", form.email);
+      formData.append("phone", form.phone);
+      formData.append("nationality", form.nationality);
+      formData.append("passport_number", form.passport_number);
+      formData.append("visa_type", form.visa_type);
+      formData.append("destination_city", form.destination_city);
+      formData.append("travel_date", form.travel_date);
+      formData.append("purpose_of_visit", form.purpose_of_visit);
+      formData.append("host_or_company", form.host_or_company);
+      formData.append("school_name", form.school_name);
+      formData.append("accommodation_details", form.accommodation_details);
+      formData.append("extra_notes", form.extra_notes);
+      formData.append("passport_file", passportFile);
+
+      await createVisaApplication(formData);
+
       setSuccessMessage("Visa application submitted successfully.");
       setForm(initialForm);
+      setPassportFile(null);
     } catch (error) {
       console.error(error);
-      setErrorMessage("Failed to submit visa application.");
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit visa application."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -65,44 +99,37 @@ export default function VisaApplicationPage() {
   return (
     <div style={ui.pageWrap}>
       <section style={ui.heroCard}>
-        <h1 style={{ ...typography.pageTitle, margin: "0 0 12px 0", color: "#0f172a" }}>
-          Visa & Invitation Support
+        <h1
+          style={{
+            ...typography.pageTitle,
+            margin: "0 0 12px 0",
+            color: "#0f172a",
+          }}
+        >
+          Visa & Invitation Application
         </h1>
+
         <p
           style={{
             ...typography.bodyLg,
             margin: 0,
-            maxWidth: "860px",
+            maxWidth: "850px",
           }}
         >
-          Submit your visa or invitation request details and let our team review
-          the information for the most suitable application path.
+          Submit your visa or invitation request. Our team will review your
+          information and contact you with the next steps.
         </p>
       </section>
 
       <section style={ui.sectionCard}>
-        <h2 style={{ ...typography.sectionTitle, marginTop: 0, marginBottom: "10px" }}>
-          Application Form
-        </h2>
-        <p style={{ ...typography.body, marginTop: 0 }}>
-          Please complete the form carefully so your request can be reviewed
-          properly.
-        </p>
-
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: "18px",
-          }}
-        >
+        <form onSubmit={handleSubmit} style={{ display: "grid", gap: "18px" }}>
           <div>
             <label style={ui.label}>Full Name</label>
             <input
               style={ui.input}
               value={form.full_name}
               onChange={(e) => updateField("full_name", e.target.value)}
+              placeholder="Enter your full name"
               required
             />
           </div>
@@ -110,10 +137,11 @@ export default function VisaApplicationPage() {
           <div>
             <label style={ui.label}>Email</label>
             <input
-              style={ui.input}
               type="email"
+              style={ui.input}
               value={form.email}
               onChange={(e) => updateField("email", e.target.value)}
+              placeholder="example@email.com"
               required
             />
           </div>
@@ -124,6 +152,7 @@ export default function VisaApplicationPage() {
               style={ui.input}
               value={form.phone}
               onChange={(e) => updateField("phone", e.target.value)}
+              placeholder="+7..."
               required
             />
           </div>
@@ -134,6 +163,7 @@ export default function VisaApplicationPage() {
               style={ui.input}
               value={form.nationality}
               onChange={(e) => updateField("nationality", e.target.value)}
+              placeholder="Cameroon"
               required
             />
           </div>
@@ -144,6 +174,7 @@ export default function VisaApplicationPage() {
               style={ui.input}
               value={form.passport_number}
               onChange={(e) => updateField("passport_number", e.target.value)}
+              placeholder="Passport number"
               required
             />
           </div>
@@ -157,11 +188,11 @@ export default function VisaApplicationPage() {
               required
             >
               <option value="">Select visa type</option>
-              <option value="tourist">Tourist</option>
-              <option value="business">Business</option>
-              <option value="student">Student</option>
-              <option value="private">Private</option>
-              <option value="work">Work</option>
+              <option value="Tourist Visa">Tourist Visa</option>
+              <option value="Private Visa">Private Visa</option>
+              <option value="Business Visa">Business Visa</option>
+              <option value="Student Visa">Student Visa</option>
+              <option value="Invitation Support">Invitation Support</option>
             </select>
           </div>
 
@@ -171,6 +202,7 @@ export default function VisaApplicationPage() {
               style={ui.input}
               value={form.destination_city}
               onChange={(e) => updateField("destination_city", e.target.value)}
+              placeholder="Moscow"
               required
             />
           </div>
@@ -178,20 +210,21 @@ export default function VisaApplicationPage() {
           <div>
             <label style={ui.label}>Travel Date</label>
             <input
-              style={ui.input}
               type="date"
+              style={ui.input}
               value={form.travel_date}
               onChange={(e) => updateField("travel_date", e.target.value)}
               required
             />
           </div>
 
-          <div style={{ gridColumn: "1 / -1" }}>
+          <div>
             <label style={ui.label}>Purpose of Visit</label>
             <textarea
-              style={{ ...ui.input, minHeight: "110px", resize: "vertical" }}
+              style={{ ...ui.input, minHeight: "120px", resize: "vertical" }}
               value={form.purpose_of_visit}
               onChange={(e) => updateField("purpose_of_visit", e.target.value)}
+              placeholder="Explain the purpose of your visit..."
               required
             />
           </div>
@@ -202,6 +235,7 @@ export default function VisaApplicationPage() {
               style={ui.input}
               value={form.host_or_company}
               onChange={(e) => updateField("host_or_company", e.target.value)}
+              placeholder="Host name or company name"
             />
           </div>
 
@@ -211,42 +245,62 @@ export default function VisaApplicationPage() {
               style={ui.input}
               value={form.school_name}
               onChange={(e) => updateField("school_name", e.target.value)}
+              placeholder="For student visa applicants"
             />
           </div>
 
-          <div style={{ gridColumn: "1 / -1" }}>
+          <div>
             <label style={ui.label}>Accommodation Details</label>
             <textarea
               style={{ ...ui.input, minHeight: "100px", resize: "vertical" }}
               value={form.accommodation_details}
-              onChange={(e) => updateField("accommodation_details", e.target.value)}
+              onChange={(e) =>
+                updateField("accommodation_details", e.target.value)
+              }
+              placeholder="Hotel, apartment, host address, or accommodation plan"
             />
           </div>
 
-          <div style={{ gridColumn: "1 / -1" }}>
+          <div>
+            <label style={ui.label}>Upload Passport File</label>
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              onChange={(e) =>
+                setPassportFile(
+                  e.target.files && e.target.files[0] ? e.target.files[0] : null
+                )
+              }
+              required
+            />
+            <p style={{ ...typography.body, fontSize: "14px", marginTop: "8px" }}>
+              Accepted file types: PDF, JPG, JPEG, PNG. Maximum size: 8MB.
+            </p>
+          </div>
+
+          <div>
             <label style={ui.label}>Extra Notes</label>
             <textarea
-              style={{ ...ui.input, minHeight: "100px", resize: "vertical" }}
+              style={{ ...ui.input, minHeight: "120px", resize: "vertical" }}
               value={form.extra_notes}
               onChange={(e) => updateField("extra_notes", e.target.value)}
+              placeholder="Any extra information..."
             />
           </div>
 
-          <div style={{ gridColumn: "1 / -1" }}>
-            <button type="submit" style={ui.primaryButton} disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit Application"}
-            </button>
-          </div>
+          <button type="submit" style={ui.primaryButton} disabled={submitting}>
+            {submitting ? "Submitting..." : "Submit Application"}
+          </button>
 
           {successMessage && (
             <div
               style={{
-                gridColumn: "1 / -1",
                 background: "#ecfdf5",
                 color: "#065f46",
                 border: "1px solid #a7f3d0",
                 padding: "12px 14px",
                 borderRadius: "12px",
+                fontWeight: 600,
               }}
             >
               {successMessage}
@@ -256,12 +310,14 @@ export default function VisaApplicationPage() {
           {errorMessage && (
             <div
               style={{
-                gridColumn: "1 / -1",
                 background: "#fef2f2",
                 color: "#991b1b",
                 border: "1px solid #fecaca",
                 padding: "12px 14px",
                 borderRadius: "12px",
+                fontWeight: 600,
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
               }}
             >
               {errorMessage}
