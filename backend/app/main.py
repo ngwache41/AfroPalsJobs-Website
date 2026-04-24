@@ -2,10 +2,12 @@ from collections.abc import Generator
 import os
 from datetime import datetime, timedelta, timezone
 import shutil
+import time
+from pathlib import Path
 
 import jwt
 import resend
-from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form
+from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -57,6 +59,14 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
+RATE_LIMIT_STORE: dict[str, list[float]] = {}
+PUBLIC_SUBMISSION_LIMIT = 5
+PUBLIC_SUBMISSION_WINDOW_SECONDS = 300
+
+ALLOWED_CV_EXTENSIONS = {".pdf", ".doc", ".docx"}
+ALLOWED_PASSPORT_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png"}
+MAX_UPLOAD_SIZE_BYTES = 8 * 1024 * 1024
+
 
 class LoginRequest(BaseModel):
     username: str
@@ -66,6 +76,97 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str
+
+
+def get_client_ip(request: Request) -> str:
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    if request.client:
+        return request.client.host
+    return "unknown"
+
+
+def check_rate_limit(request: Request, action: str) -> None:
+    client_ip = get_client_ip(request)
+    key = f"{action}:{client_ip}"
+    now = time.time()
+
+    timestamps = RATE_LIMIT_STORE.get(key, [])
+    timestamps = [
+        timestamp
+        for timestamp in timestamps
+        if now - timestamp < PUBLIC_SUBMISSION_WINDOW_SECONDS
+    ]
+
+    if len(timestamps) >= PUBLIC_SUBMISSION_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many submissions. Please wait a few minutes and try again.",
+        )
+
+    timestamps.append(now)
+    RATE_LIMIT_STORE[key] = timestamps
+
+
+def safe_upload_filename(original_filename: str) -> str:
+    original_name = Path(original_filename or "uploaded_file").name
+    stem = Path(original_name).stem
+    suffix = Path(original_name).suffix.lower()
+
+    safe_stem = "".join(
+        character if character.isalnum() or character in ("-", "_") else "_"
+        for character in stem
+    ).strip("_")
+
+    if not safe_stem:
+        safe_stem = "file"
+
+    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    return f"{timestamp}_{safe_stem}{suffix}"
+
+
+async def validate_and_save_upload(
+    upload_file: UploadFile,
+    allowed_extensions: set[str],
+    label: str,
+) -> tuple[str, str]:
+    filename = safe_upload_filename(upload_file.filename or "")
+    extension = Path(filename).suffix.lower()
+
+    if extension not in allowed_extensions:
+        allowed = ", ".join(sorted(allowed_extensions))
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid {label} file type. Allowed file types: {allowed}",
+        )
+
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    total_size = 0
+    with open(file_path, "wb") as buffer:
+        while True:
+            chunk = await upload_file.read(1024 * 1024)
+            if not chunk:
+                break
+
+            total_size += len(chunk)
+            if total_size > MAX_UPLOAD_SIZE_BYTES:
+                buffer.close()
+                try:
+                    os.remove(file_path)
+                except FileNotFoundError:
+                    pass
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"{label.capitalize()} file is too large. Maximum size is 8MB.",
+                )
+
+            buffer.write(chunk)
+
+    await upload_file.close()
+
+    return file_path, f"/uploads/{filename}"
 
 
 def build_email_layout(title: str, body_html: str) -> str:
@@ -179,7 +280,7 @@ def debug_send_test_email():
         "Test Email Working",
         """
         <p>This is a successful test email from AfroPals Jobs.</p>
-        <p>Your email system is now active and working correctly.</p>
+        <p>Your email system is active and working correctly.</p>
         """
     )
     return send_email_via_resend(
@@ -340,6 +441,7 @@ def update_job_status(
 
 @app.post("/job-applications")
 async def create_job_application(
+    request: Request,
     job_id: int = Form(...),
     full_name: str = Form(...),
     email: str = Form(...),
@@ -348,16 +450,17 @@ async def create_job_application(
     cv_file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
+    check_rate_limit(request, "job_application")
+
     job = db.query(Job).filter(Job.id == job_id, Job.status == "approved").first()
     if job is None:
         raise HTTPException(status_code=404, detail="Approved job not found")
 
-    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    filename = f"{timestamp}_{cv_file.filename}"
-    file_path = os.path.join(UPLOAD_DIR, filename)
-
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(cv_file.file, buffer)
+    file_path, file_url = await validate_and_save_upload(
+        cv_file,
+        ALLOWED_CV_EXTENSIONS,
+        "CV",
+    )
 
     application = JobApplication(
         job_id=job_id,
@@ -410,7 +513,7 @@ async def create_job_application(
     return {
         "message": "Job application submitted successfully",
         "application_id": application.id,
-        "cv_file_url": f"/uploads/{filename}",
+        "cv_file_url": file_url,
     }
 
 
@@ -442,6 +545,7 @@ def get_job_application(
 
 @app.post("/visa-applications")
 async def create_visa_application(
+    request: Request,
     full_name: str = Form(...),
     email: str = Form(...),
     phone: str = Form(...),
@@ -458,12 +562,13 @@ async def create_visa_application(
     passport_file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
-    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    filename = f"{timestamp}_{passport_file.filename}"
-    file_path = os.path.join(UPLOAD_DIR, filename)
+    check_rate_limit(request, "visa_application")
 
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(passport_file.file, buffer)
+    file_path, file_url = await validate_and_save_upload(
+        passport_file,
+        ALLOWED_PASSPORT_EXTENSIONS,
+        "passport",
+    )
 
     visa_application = VisaApplication(
         full_name=full_name,
@@ -531,7 +636,7 @@ async def create_visa_application(
 
     return {
         "message": "Application submitted",
-        "file_url": f"/uploads/{filename}",
+        "file_url": file_url,
     }
 
 
