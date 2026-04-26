@@ -23,8 +23,6 @@ from app.visa_schemas import VisaApplicationRead, VisaApplicationStatusUpdate
 
 app = FastAPI(title="AfroPals Jobs API")
 
-# ================= ENV =================
-
 frontend_url = os.getenv("FRONTEND_URL", "https://afropalsjobs.ru")
 secret_key = os.getenv("SECRET_KEY", "supersecretkey")
 
@@ -51,8 +49,6 @@ cloudinary.config(
     secure=True,
 )
 
-# ================= CORS =================
-
 origins = [
     frontend_url,
     "https://afropalsjobs.ru",
@@ -69,8 +65,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# ================= DATABASE =================
 
 Base.metadata.create_all(bind=engine)
 
@@ -98,18 +92,15 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-# ================= SECURITY / UPLOAD SETTINGS =================
-
 RATE_LIMIT_STORE: dict[str, list[float]] = {}
 PUBLIC_SUBMISSION_LIMIT = 5
 PUBLIC_SUBMISSION_WINDOW_SECONDS = 300
 
 ALLOWED_CV_EXTENSIONS = {".pdf", ".doc", ".docx"}
 ALLOWED_PASSPORT_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png"}
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 MAX_UPLOAD_SIZE_BYTES = 8 * 1024 * 1024
 
-
-# ================= MODELS =================
 
 class LoginRequest(BaseModel):
     username: str
@@ -120,8 +111,6 @@ class LoginResponse(BaseModel):
     access_token: str
     token_type: str
 
-
-# ================= RATE LIMIT =================
 
 def get_client_ip(request: Request) -> str:
     forwarded_for = request.headers.get("x-forwarded-for")
@@ -156,8 +145,6 @@ def check_rate_limit(request: Request, action: str) -> None:
     RATE_LIMIT_STORE[key] = timestamps
 
 
-# ================= FILE HELPERS =================
-
 def safe_upload_filename(original_filename: str) -> str:
     original_name = Path(original_filename or "uploaded_file").name
     stem = Path(original_name).stem
@@ -179,7 +166,7 @@ async def validate_upload_file(
     upload_file: UploadFile,
     allowed_extensions: set[str],
     label: str,
-) -> tuple[str, bytes]:
+) -> tuple[str, bytes, str]:
     filename = safe_upload_filename(upload_file.filename or "")
     extension = Path(filename).suffix.lower()
 
@@ -204,7 +191,7 @@ async def validate_upload_file(
             detail=f"{label.capitalize()} file is empty.",
         )
 
-    return filename, file_bytes
+    return filename, file_bytes, extension
 
 
 async def upload_to_cloudinary(
@@ -219,27 +206,36 @@ async def upload_to_cloudinary(
             detail="Cloudinary is not configured on the backend.",
         )
 
-    filename, file_bytes = await validate_upload_file(
+    filename, file_bytes, extension = await validate_upload_file(
         upload_file,
         allowed_extensions,
         label,
     )
 
-    public_id = Path(filename).stem
+    public_id_without_extension = Path(filename).stem
 
     try:
-        result = cloudinary.uploader.upload(
-            io.BytesIO(file_bytes),
-            folder=folder,
-            resource_type="raw",
-            public_id=public_id,
-            filename_override=filename,
-            use_filename=True,
-            unique_filename=True,
-            overwrite=False,
-            type="upload",
-            access_mode="public",
-        )
+        if extension in IMAGE_EXTENSIONS:
+            result = cloudinary.uploader.upload(
+                io.BytesIO(file_bytes),
+                folder=folder,
+                resource_type="image",
+                public_id=public_id_without_extension,
+                overwrite=False,
+                type="upload",
+                access_mode="public",
+            )
+        else:
+            result = cloudinary.uploader.upload(
+                io.BytesIO(file_bytes),
+                folder=folder,
+                resource_type="raw",
+                public_id=filename,
+                overwrite=False,
+                type="upload",
+                access_mode="public",
+            )
+
     except Exception as exc:
         print("CLOUDINARY ERROR:", str(exc))
         raise HTTPException(
@@ -257,8 +253,6 @@ async def upload_to_cloudinary(
 
     return secure_url
 
-
-# ================= EMAIL =================
 
 def build_email_layout(title: str, body_html: str) -> str:
     return f"""
@@ -311,8 +305,6 @@ def send_admin_notification(subject: str, html: str) -> dict:
     return send_email_via_resend(admin_notification_email, subject, html)
 
 
-# ================= AUTH =================
-
 def create_token(username: str, role: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=access_token_expire_minutes)
     payload = {
@@ -354,14 +346,10 @@ def verify_employer_token(authorization: str | None = Header(default=None)) -> d
     return payload
 
 
-# ================= ROOT =================
-
 @app.get("/")
 def root():
     return {"message": "API is running"}
 
-
-# ================= ADMIN AUTH =================
 
 @app.post("/admin/login", response_model=LoginResponse)
 def admin_login(payload: LoginRequest):
@@ -377,8 +365,6 @@ def admin_me(_: dict = Depends(verify_admin_token)):
     return {"message": "Authenticated admin"}
 
 
-# ================= EMPLOYER AUTH =================
-
 @app.post("/employer/login", response_model=LoginResponse)
 def employer_login(payload: LoginRequest):
     if payload.username != employer_username or payload.password != employer_password:
@@ -392,8 +378,6 @@ def employer_login(payload: LoginRequest):
 def employer_me(_: dict = Depends(verify_employer_token)):
     return {"message": "Authenticated employer"}
 
-
-# ================= JOBS =================
 
 @app.get("/jobs", response_model=list[JobRead])
 def list_jobs(db: Session = Depends(get_db)):
@@ -487,8 +471,6 @@ def update_job_status(
     return job
 
 
-# ================= JOB APPLICATIONS =================
-
 @app.post("/job-applications")
 async def create_job_application(
     request: Request,
@@ -574,8 +556,6 @@ def list_job_applications(
 ):
     return db.query(JobApplication).all()
 
-
-# ================= VISA APPLICATIONS =================
 
 @app.post("/visa-applications")
 async def create_visa_application(
