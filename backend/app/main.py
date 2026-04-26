@@ -1,4 +1,5 @@
 from collections.abc import Generator
+import io
 import os
 from datetime import datetime, timedelta, timezone
 import time
@@ -23,7 +24,6 @@ from app.visa_schemas import VisaApplicationRead, VisaApplicationStatusUpdate
 app = FastAPI(title="AfroPals Jobs API")
 
 frontend_url = os.getenv("FRONTEND_URL", "https://afropalsjobs.ru")
-backend_url = os.getenv("BACKEND_URL", "https://afropals-backend.onrender.com")
 secret_key = os.getenv("SECRET_KEY", "supersecretkey")
 
 admin_username = os.getenv("ADMIN_USERNAME", "admin")
@@ -71,10 +71,10 @@ Base.metadata.create_all(bind=engine)
 
 def run_light_migrations() -> None:
     with engine.connect() as connection:
-        columns = connection.execute(text("PRAGMA table_info(visa_applications)")).fetchall()
-        column_names = [column[1] for column in columns]
+        visa_columns = connection.execute(text("PRAGMA table_info(visa_applications)")).fetchall()
+        visa_column_names = [column[1] for column in visa_columns]
 
-        if "passport_file_path" not in column_names:
+        if "passport_file_path" not in visa_column_names:
             connection.execute(
                 text("ALTER TABLE visa_applications ADD COLUMN passport_file_path VARCHAR(500)")
             )
@@ -154,7 +154,7 @@ async def validate_upload_file(
     upload_file: UploadFile,
     allowed_extensions: set[str],
     label: str,
-) -> str:
+) -> tuple[str, bytes]:
     filename = safe_upload_filename(upload_file.filename or "")
     extension = Path(filename).suffix.lower()
 
@@ -166,7 +166,6 @@ async def validate_upload_file(
         )
 
     file_bytes = await upload_file.read()
-    await upload_file.close()
 
     if len(file_bytes) > MAX_UPLOAD_SIZE_BYTES:
         raise HTTPException(
@@ -174,7 +173,13 @@ async def validate_upload_file(
             detail=f"{label.capitalize()} file is too large. Maximum size is 8MB.",
         )
 
-    return filename
+    if len(file_bytes) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{label.capitalize()} file is empty.",
+        )
+
+    return filename, file_bytes
 
 
 async def upload_to_cloudinary(
@@ -189,19 +194,22 @@ async def upload_to_cloudinary(
             detail="Cloudinary is not configured on the backend.",
         )
 
-    filename = await validate_upload_file(upload_file, allowed_extensions, label)
-
-    await upload_file.seek(0)
+    filename, file_bytes = await validate_upload_file(
+        upload_file,
+        allowed_extensions,
+        label,
+    )
 
     try:
         result = cloudinary.uploader.upload(
-            upload_file.file,
+            io.BytesIO(file_bytes),
             folder=folder,
             resource_type="auto",
             public_id=Path(filename).stem,
             overwrite=False,
         )
     except Exception as exc:
+        print("CLOUDINARY ERROR:", str(exc))
         raise HTTPException(
             status_code=500,
             detail=f"Failed to upload {label} file to cloud storage: {str(exc)}",
@@ -322,22 +330,6 @@ def root():
     return {"message": "API is running"}
 
 
-@app.get("/debug/send-test-email")
-def debug_send_test_email():
-    html = build_email_layout(
-        "Test Email Working",
-        """
-        <p>This is a successful test email from AfroPals Jobs.</p>
-        <p>Your email system is active and working correctly.</p>
-        """
-    )
-    return send_email_via_resend(
-        to_email=admin_notification_email,
-        subject="AfroPals test email",
-        html=html,
-    )
-
-
 @app.post("/admin/login", response_model=LoginResponse)
 def admin_login(payload: LoginRequest):
     if payload.username != admin_username or payload.password != admin_password:
@@ -433,7 +425,6 @@ def create_employer_job(
         <p><strong>Company:</strong> {job.company}</p>
         <p><strong>Location:</strong> {job.location}</p>
         <p><strong>Status:</strong> {job.status}</p>
-        <p>Please review this job in the admin dashboard.</p>
         """
     )
     send_admin_notification(
@@ -458,21 +449,6 @@ def update_job_status(
     job.status = payload.status
     db.commit()
     db.refresh(job)
-
-    employer_html = build_email_layout(
-        "Job Status Updated",
-        f"""
-        <p>Your submitted job has been reviewed.</p>
-        <p><strong>Title:</strong> {job.title}</p>
-        <p><strong>Company:</strong> {job.company}</p>
-        <p><strong>New Status:</strong> {job.status}</p>
-        """
-    )
-    send_employer_notification(
-        subject=f"Job status updated: {job.title}",
-        html=employer_html,
-    )
-
     return job
 
 
@@ -558,22 +534,6 @@ def list_job_applications(
     return db.query(JobApplication).all()
 
 
-@app.get("/job-applications/{application_id}", response_model=JobApplicationRead)
-def get_job_application(
-    application_id: int,
-    db: Session = Depends(get_db),
-    _: dict = Depends(verify_admin_token),
-):
-    application = (
-        db.query(JobApplication)
-        .filter(JobApplication.id == application_id)
-        .first()
-    )
-    if application is None:
-        raise HTTPException(status_code=404, detail="Job application not found")
-    return application
-
-
 @app.post("/visa-applications")
 async def create_visa_application(
     request: Request,
@@ -650,9 +610,6 @@ async def create_visa_application(
         <p>Dear {full_name},</p>
         <p>Your visa application has been received successfully.</p>
         <p>Our team will review your request and contact you with the next steps.</p>
-        <p><strong>Visa Type:</strong> {visa_type}</p>
-        <p><strong>Destination City:</strong> {destination_city}</p>
-        <p><strong>Travel Date:</strong> {travel_date}</p>
         """
     )
     send_email_via_resend(
@@ -673,22 +630,6 @@ def list_visa_applications(
     _: dict = Depends(verify_admin_token),
 ):
     return db.query(VisaApplication).all()
-
-
-@app.get("/visa-applications/{application_id}", response_model=VisaApplicationRead)
-def get_visa_application(
-    application_id: int,
-    db: Session = Depends(get_db),
-    _: dict = Depends(verify_admin_token),
-):
-    application = (
-        db.query(VisaApplication)
-        .filter(VisaApplication.id == application_id)
-        .first()
-    )
-    if application is None:
-        raise HTTPException(status_code=404, detail="Visa application not found")
-    return application
 
 
 @app.patch("/visa-applications/{application_id}/status", response_model=VisaApplicationRead)
