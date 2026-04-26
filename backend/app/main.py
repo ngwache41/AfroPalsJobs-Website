@@ -23,6 +23,8 @@ from app.visa_schemas import VisaApplicationRead, VisaApplicationStatusUpdate
 
 app = FastAPI(title="AfroPals Jobs API")
 
+# ================= ENV =================
+
 frontend_url = os.getenv("FRONTEND_URL", "https://afropalsjobs.ru")
 secret_key = os.getenv("SECRET_KEY", "supersecretkey")
 
@@ -49,6 +51,8 @@ cloudinary.config(
     secure=True,
 )
 
+# ================= CORS =================
+
 origins = [
     frontend_url,
     "https://afropalsjobs.ru",
@@ -65,6 +69,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ================= DATABASE =================
 
 Base.metadata.create_all(bind=engine)
 
@@ -83,6 +89,17 @@ def run_light_migrations() -> None:
 
 run_light_migrations()
 
+
+def get_db() -> Generator[Session, None, None]:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+# ================= SECURITY / UPLOAD SETTINGS =================
+
 RATE_LIMIT_STORE: dict[str, list[float]] = {}
 PUBLIC_SUBMISSION_LIMIT = 5
 PUBLIC_SUBMISSION_WINDOW_SECONDS = 300
@@ -91,6 +108,8 @@ ALLOWED_CV_EXTENSIONS = {".pdf", ".doc", ".docx"}
 ALLOWED_PASSPORT_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png"}
 MAX_UPLOAD_SIZE_BYTES = 8 * 1024 * 1024
 
+
+# ================= MODELS =================
 
 class LoginRequest(BaseModel):
     username: str
@@ -102,12 +121,16 @@ class LoginResponse(BaseModel):
     token_type: str
 
 
+# ================= RATE LIMIT =================
+
 def get_client_ip(request: Request) -> str:
     forwarded_for = request.headers.get("x-forwarded-for")
     if forwarded_for:
         return forwarded_for.split(",")[0].strip()
+
     if request.client:
         return request.client.host
+
     return "unknown"
 
 
@@ -132,6 +155,8 @@ def check_rate_limit(request: Request, action: str) -> None:
     timestamps.append(now)
     RATE_LIMIT_STORE[key] = timestamps
 
+
+# ================= FILE HELPERS =================
 
 def safe_upload_filename(original_filename: str) -> str:
     original_name = Path(original_filename or "uploaded_file").name
@@ -200,13 +225,20 @@ async def upload_to_cloudinary(
         label,
     )
 
+    public_id = Path(filename).stem
+    extension = Path(filename).suffix.lower()
+
     try:
         result = cloudinary.uploader.upload(
             io.BytesIO(file_bytes),
             folder=folder,
-            resource_type="auto",
-            public_id=Path(filename).stem,
+            resource_type="raw",
+            public_id=public_id,
+            filename_override=filename,
+            use_filename=True,
+            unique_filename=True,
             overwrite=False,
+            type="upload",
         )
     except Exception as exc:
         print("CLOUDINARY ERROR:", str(exc))
@@ -216,14 +248,20 @@ async def upload_to_cloudinary(
         )
 
     secure_url = result.get("secure_url")
+
     if not secure_url:
         raise HTTPException(
             status_code=500,
             detail=f"Cloudinary did not return a secure URL for the {label} file.",
         )
 
+    if extension and not secure_url.lower().endswith(extension):
+        secure_url = f"{secure_url}{extension}"
+
     return secure_url
 
+
+# ================= EMAIL =================
 
 def build_email_layout(title: str, body_html: str) -> str:
     return f"""
@@ -276,6 +314,8 @@ def send_admin_notification(subject: str, html: str) -> dict:
     return send_email_via_resend(admin_notification_email, subject, html)
 
 
+# ================= AUTH =================
+
 def create_token(username: str, role: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=access_token_expire_minutes)
     payload = {
@@ -301,30 +341,30 @@ def decode_token_from_header(authorization: str | None) -> dict:
 
 def verify_admin_token(authorization: str | None = Header(default=None)) -> dict:
     payload = decode_token_from_header(authorization)
+
     if payload.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Forbidden")
+
     return payload
 
 
 def verify_employer_token(authorization: str | None = Header(default=None)) -> dict:
     payload = decode_token_from_header(authorization)
+
     if payload.get("role") != "employer":
         raise HTTPException(status_code=403, detail="Forbidden")
+
     return payload
 
 
-def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
+# ================= ROOT =================
 
 @app.get("/")
 def root():
     return {"message": "API is running"}
 
+
+# ================= ADMIN AUTH =================
 
 @app.post("/admin/login", response_model=LoginResponse)
 def admin_login(payload: LoginRequest):
@@ -340,6 +380,8 @@ def admin_me(_: dict = Depends(verify_admin_token)):
     return {"message": "Authenticated admin"}
 
 
+# ================= EMPLOYER AUTH =================
+
 @app.post("/employer/login", response_model=LoginResponse)
 def employer_login(payload: LoginRequest):
     if payload.username != employer_username or payload.password != employer_password:
@@ -353,6 +395,8 @@ def employer_login(payload: LoginRequest):
 def employer_me(_: dict = Depends(verify_employer_token)):
     return {"message": "Authenticated employer"}
 
+
+# ================= JOBS =================
 
 @app.get("/jobs", response_model=list[JobRead])
 def list_jobs(db: Session = Depends(get_db)):
@@ -381,9 +425,11 @@ def create_job(
         status="approved",
         created_by="admin",
     )
+
     db.add(job)
     db.commit()
     db.refresh(job)
+
     return job
 
 
@@ -401,6 +447,7 @@ def create_employer_job(
         status="pending",
         created_by="employer",
     )
+
     db.add(job)
     db.commit()
     db.refresh(job)
@@ -415,6 +462,7 @@ def create_employer_job(
         <p><strong>Status:</strong> {job.status}</p>
         """
     )
+
     send_admin_notification(
         subject="New employer job pending approval",
         html=admin_html,
@@ -431,14 +479,18 @@ def update_job_status(
     _: dict = Depends(verify_admin_token),
 ):
     job = db.query(Job).filter(Job.id == job_id).first()
+
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
 
     job.status = payload.status
     db.commit()
     db.refresh(job)
+
     return job
 
+
+# ================= JOB APPLICATIONS =================
 
 @app.post("/job-applications")
 async def create_job_application(
@@ -454,6 +506,7 @@ async def create_job_application(
     check_rate_limit(request, "job_application")
 
     job = db.query(Job).filter(Job.id == job_id, Job.status == "approved").first()
+
     if job is None:
         raise HTTPException(status_code=404, detail="Approved job not found")
 
@@ -473,6 +526,7 @@ async def create_job_application(
         cv_file_path=file_url,
         status="pending",
     )
+
     db.add(application)
     db.commit()
     db.refresh(application)
@@ -488,6 +542,7 @@ async def create_job_application(
         <p><a href="{file_url}">View uploaded CV</a></p>
         """
     )
+
     send_admin_notification(
         subject="New job application received",
         html=admin_html,
@@ -501,6 +556,7 @@ async def create_job_application(
         <p>We received your application for <strong>{job.title}</strong>.</p>
         """
     )
+
     send_email_via_resend(
         to_email=email,
         subject="Application received - AfroPals Jobs",
@@ -521,6 +577,8 @@ def list_job_applications(
 ):
     return db.query(JobApplication).all()
 
+
+# ================= VISA APPLICATIONS =================
 
 @app.post("/visa-applications")
 async def create_visa_application(
@@ -587,6 +645,7 @@ async def create_visa_application(
         <p><a href="{file_url}">View uploaded passport file</a></p>
         """
     )
+
     send_admin_notification(
         subject="New visa application received",
         html=admin_html,
@@ -600,6 +659,7 @@ async def create_visa_application(
         <p>Our team will review your request and contact you with the next steps.</p>
         """
     )
+
     send_email_via_resend(
         to_email=email,
         subject="Visa application received - AfroPals Jobs",
@@ -632,10 +692,12 @@ def update_visa_application_status(
         .filter(VisaApplication.id == application_id)
         .first()
     )
+
     if application is None:
         raise HTTPException(status_code=404, detail="Visa application not found")
 
     application.status = payload.status
     db.commit()
     db.refresh(application)
+
     return application
