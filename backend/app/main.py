@@ -226,7 +226,6 @@ async def upload_to_cloudinary(
     )
 
     public_id = Path(filename).stem
-    extension = Path(filename).suffix.lower()
 
     try:
         result = cloudinary.uploader.upload(
@@ -239,6 +238,7 @@ async def upload_to_cloudinary(
             unique_filename=True,
             overwrite=False,
             type="upload",
+            access_mode="public",
         )
     except Exception as exc:
         print("CLOUDINARY ERROR:", str(exc))
@@ -254,9 +254,6 @@ async def upload_to_cloudinary(
             status_code=500,
             detail=f"Cloudinary did not return a secure URL for the {label} file.",
         )
-
-    if extension and not secure_url.lower().endswith(extension):
-        secure_url = f"{secure_url}{extension}"
 
     return secure_url
 
