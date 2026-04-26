@@ -4,13 +4,17 @@ import os
 from datetime import datetime, timedelta, timezone
 import time
 from pathlib import Path
+from urllib.parse import quote, unquote
 
 import cloudinary
 import cloudinary.uploader
+import cloudinary.utils
 import jwt
+import requests
 import resend
 from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -24,6 +28,7 @@ from app.visa_schemas import VisaApplicationRead, VisaApplicationStatusUpdate
 app = FastAPI(title="AfroPals Jobs API")
 
 frontend_url = os.getenv("FRONTEND_URL", "https://afropalsjobs.ru")
+backend_url = os.getenv("BACKEND_URL", "https://afropals-backend.onrender.com")
 secret_key = os.getenv("SECRET_KEY", "supersecretkey")
 
 admin_username = os.getenv("ADMIN_USERNAME", "admin")
@@ -194,6 +199,12 @@ async def validate_upload_file(
     return filename, file_bytes, extension
 
 
+def build_backend_file_url(resource_type: str, public_id: str, filename: str) -> str:
+    encoded_public_id = quote(public_id, safe="")
+    encoded_filename = quote(filename, safe="")
+    return f"{backend_url}/files/{resource_type}/{encoded_public_id}?filename={encoded_filename}"
+
+
 async def upload_to_cloudinary(
     upload_file: UploadFile,
     allowed_extensions: set[str],
@@ -225,6 +236,8 @@ async def upload_to_cloudinary(
                 type="upload",
                 access_mode="public",
             )
+            public_id = result.get("public_id")
+            resource_type = "image"
         else:
             result = cloudinary.uploader.upload(
                 io.BytesIO(file_bytes),
@@ -235,6 +248,8 @@ async def upload_to_cloudinary(
                 type="upload",
                 access_mode="public",
             )
+            public_id = result.get("public_id")
+            resource_type = "raw"
 
     except Exception as exc:
         print("CLOUDINARY ERROR:", str(exc))
@@ -243,15 +258,70 @@ async def upload_to_cloudinary(
             detail=f"Failed to upload {label} file to cloud storage: {str(exc)}",
         )
 
-    secure_url = result.get("secure_url")
-
-    if not secure_url:
+    if not public_id:
         raise HTTPException(
             status_code=500,
-            detail=f"Cloudinary did not return a secure URL for the {label} file.",
+            detail=f"Cloudinary did not return a public ID for the {label} file.",
         )
 
-    return secure_url
+    return build_backend_file_url(resource_type, public_id, filename)
+
+
+@app.get("/files/{resource_type}/{encoded_public_id}")
+def open_uploaded_file(
+    resource_type: str,
+    encoded_public_id: str,
+    filename: str = "download",
+):
+    public_id = unquote(encoded_public_id)
+    safe_filename = Path(filename).name
+
+    if resource_type not in {"raw", "image"}:
+        raise HTTPException(status_code=400, detail="Invalid resource type.")
+
+    try:
+        signed_url, _ = cloudinary.utils.cloudinary_url(
+            public_id,
+            resource_type=resource_type,
+            type="upload",
+            secure=True,
+            sign_url=True,
+        )
+
+        cloudinary_response = requests.get(signed_url, stream=True, timeout=30)
+
+        if cloudinary_response.status_code != 200:
+            print("CLOUDINARY FILE OPEN ERROR:", cloudinary_response.status_code, cloudinary_response.text[:300])
+            raise HTTPException(
+                status_code=cloudinary_response.status_code,
+                detail="Cloudinary refused file delivery.",
+            )
+
+        content_type = cloudinary_response.headers.get(
+            "content-type",
+            "application/octet-stream",
+        )
+
+        disposition_type = "inline"
+        if safe_filename.lower().endswith((".doc", ".docx")):
+            disposition_type = "attachment"
+
+        return StreamingResponse(
+            cloudinary_response.iter_content(chunk_size=1024 * 1024),
+            media_type=content_type,
+            headers={
+                "Content-Disposition": f'{disposition_type}; filename="{safe_filename}"'
+            },
+        )
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print("BACKEND FILE OPEN ERROR:", str(exc))
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not open uploaded file: {str(exc)}",
+        )
 
 
 def build_email_layout(title: str, body_html: str) -> str:
