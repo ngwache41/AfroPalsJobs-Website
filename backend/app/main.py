@@ -200,9 +200,12 @@ async def validate_upload_file(
 
 
 def build_backend_file_url(resource_type: str, public_id: str, filename: str) -> str:
-    encoded_public_id = quote(public_id, safe="")
-    encoded_filename = quote(filename, safe="")
-    return f"{backend_url}/files/{resource_type}/{encoded_public_id}?filename={encoded_filename}"
+    return (
+        f"{backend_url}/files/open"
+        f"?resource_type={quote(resource_type, safe='')}"
+        f"&public_id={quote(public_id, safe='')}"
+        f"&filename={quote(filename, safe='')}"
+    )
 
 
 async def upload_to_cloudinary(
@@ -267,22 +270,23 @@ async def upload_to_cloudinary(
     return build_backend_file_url(resource_type, public_id, filename)
 
 
-@app.get("/files/{resource_type}/{encoded_public_id}")
+@app.get("/files/open")
 def open_uploaded_file(
     resource_type: str,
-    encoded_public_id: str,
+    public_id: str,
     filename: str = "download",
 ):
-    public_id = unquote(encoded_public_id)
-    safe_filename = Path(filename).name
+    decoded_resource_type = unquote(resource_type)
+    decoded_public_id = unquote(public_id)
+    safe_filename = Path(unquote(filename)).name
 
-    if resource_type not in {"raw", "image"}:
+    if decoded_resource_type not in {"raw", "image"}:
         raise HTTPException(status_code=400, detail="Invalid resource type.")
 
     try:
         signed_url, _ = cloudinary.utils.cloudinary_url(
-            public_id,
-            resource_type=resource_type,
+            decoded_public_id,
+            resource_type=decoded_resource_type,
             type="upload",
             secure=True,
             sign_url=True,
@@ -291,7 +295,11 @@ def open_uploaded_file(
         cloudinary_response = requests.get(signed_url, stream=True, timeout=30)
 
         if cloudinary_response.status_code != 200:
-            print("CLOUDINARY FILE OPEN ERROR:", cloudinary_response.status_code, cloudinary_response.text[:300])
+            print(
+                "CLOUDINARY FILE OPEN ERROR:",
+                cloudinary_response.status_code,
+                cloudinary_response.text[:300],
+            )
             raise HTTPException(
                 status_code=cloudinary_response.status_code,
                 detail="Cloudinary refused file delivery.",
