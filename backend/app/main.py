@@ -275,6 +275,7 @@ def open_uploaded_file(
     resource_type: str,
     public_id: str,
     filename: str = "download",
+    download: bool = False,
 ):
     decoded_resource_type = unquote(resource_type)
     decoded_public_id = unquote(public_id)
@@ -310,9 +311,7 @@ def open_uploaded_file(
             "application/octet-stream",
         )
 
-        disposition_type = "inline"
-        if safe_filename.lower().endswith((".doc", ".docx")):
-            disposition_type = "attachment"
+        disposition_type = "attachment" if download else "inline"
 
         return StreamingResponse(
             cloudinary_response.iter_content(chunk_size=1024 * 1024),
@@ -596,7 +595,8 @@ async def create_job_application(
         <p><strong>Email:</strong> {application.email}</p>
         <p><strong>Phone:</strong> {application.phone}</p>
         <p><strong>Cover Letter:</strong> {application.cover_letter or "No cover letter provided."}</p>
-        <p><a href="{file_url}">View uploaded CV</a></p>
+        <p><a href="{file_url}">Open uploaded CV</a></p>
+        <p><a href="{file_url}&download=true">Download uploaded CV</a></p>
         """
     )
 
@@ -697,7 +697,8 @@ async def create_visa_application(
         <p><strong>Destination City:</strong> {visa_application.destination_city}</p>
         <p><strong>Travel Date:</strong> {visa_application.travel_date}</p>
         <p><strong>Purpose of Visit:</strong> {visa_application.purpose_of_visit}</p>
-        <p><a href="{file_url}">View uploaded passport file</a></p>
+        <p><a href="{file_url}">Open uploaded passport file</a></p>
+        <p><a href="{file_url}&download=true">Download uploaded passport file</a></p>
         """
     )
 
