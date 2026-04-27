@@ -20,6 +20,22 @@ const actionButtonStyle: React.CSSProperties = {
   fontSize: "14px",
 };
 
+const fileButtonStyle: React.CSSProperties = {
+  ...ui.primaryButton,
+  display: "inline-block",
+  textDecoration: "none",
+  padding: "10px 14px",
+  fontSize: "14px",
+};
+
+const downloadButtonStyle: React.CSSProperties = {
+  ...ui.secondaryButton,
+  display: "inline-block",
+  textDecoration: "none",
+  padding: "10px 14px",
+  fontSize: "14px",
+};
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
@@ -31,6 +47,16 @@ function buildFileUrl(path?: string | null) {
   }
 
   return `${API_BASE_URL}/${path.replace(/\\/g, "/")}`;
+}
+
+function buildDownloadUrl(path?: string | null) {
+  const fileUrl = buildFileUrl(path);
+
+  if (!fileUrl) return "";
+
+  return fileUrl.includes("?")
+    ? `${fileUrl}&download=true`
+    : `${fileUrl}?download=true`;
 }
 
 export default function AdminDashboardPage() {
@@ -367,18 +393,27 @@ export default function AdminDashboardPage() {
                     {application.cover_letter || "No cover letter provided."}
                   </div>
 
-                  <a
-                    href={buildFileUrl(application.cv_file_path)}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      ...ui.primaryButton,
-                      display: "inline-block",
-                      textDecoration: "none",
-                    }}
-                  >
-                    View Uploaded CV
-                  </a>
+                  {application.cv_file_path && (
+                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                      <a
+                        href={buildFileUrl(application.cv_file_path)}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={fileButtonStyle}
+                      >
+                        Open CV
+                      </a>
+
+                      <a
+                        href={buildDownloadUrl(application.cv_file_path)}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={downloadButtonStyle}
+                      >
+                        Download CV
+                      </a>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -480,20 +515,32 @@ export default function AdminDashboardPage() {
                     )}
 
                     {application.passport_file_path && (
-                      <a
-                        href={buildFileUrl(application.passport_file_path)}
-                        target="_blank"
-                        rel="noreferrer"
+                      <div
                         style={{
-                          ...ui.primaryButton,
-                          display: "inline-block",
-                          textDecoration: "none",
+                          display: "flex",
+                          gap: "10px",
+                          flexWrap: "wrap",
                           marginTop: "8px",
-                          width: "fit-content",
                         }}
                       >
-                        View Uploaded Passport File
-                      </a>
+                        <a
+                          href={buildFileUrl(application.passport_file_path)}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={fileButtonStyle}
+                        >
+                          Open Passport File
+                        </a>
+
+                        <a
+                          href={buildDownloadUrl(application.passport_file_path)}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={downloadButtonStyle}
+                        >
+                          Download Passport File
+                        </a>
+                      </div>
                     )}
                   </div>
 
