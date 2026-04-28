@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
+# ================= JOB =================
 
 class JobCreate(BaseModel):
     title: str
@@ -22,6 +23,12 @@ class JobRead(BaseModel):
     created_by: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# ================= JOB APPLICATION =================
+
+class JobApplicationStatusUpdate(BaseModel):
+    status: str
 
 
 class JobApplicationRead(BaseModel):

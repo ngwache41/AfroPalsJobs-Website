@@ -21,7 +21,13 @@ from sqlalchemy.orm import Session
 
 from app.database import Base, SessionLocal, engine
 from app.models import Job, JobApplication
-from app.schemas import JobCreate, JobRead, JobApplicationRead, JobStatusUpdate
+from app.schemas import (
+    JobCreate,
+    JobRead,
+    JobApplicationRead,
+    JobStatusUpdate,
+    JobApplicationStatusUpdate,
+)
 from app.visa_models import VisaApplication
 from app.visa_schemas import VisaApplicationRead, VisaApplicationStatusUpdate
 
@@ -633,6 +639,29 @@ def list_job_applications(
     _: dict = Depends(verify_admin_token),
 ):
     return db.query(JobApplication).all()
+
+
+@app.patch("/job-applications/{application_id}/status", response_model=JobApplicationRead)
+def update_job_application_status(
+    application_id: int,
+    payload: JobApplicationStatusUpdate,
+    db: Session = Depends(get_db),
+    _: dict = Depends(verify_admin_token),
+):
+    application = (
+        db.query(JobApplication)
+        .filter(JobApplication.id == application_id)
+        .first()
+    )
+
+    if application is None:
+        raise HTTPException(status_code=404, detail="Job application not found")
+
+    application.status = payload.status
+    db.commit()
+    db.refresh(application)
+
+    return application
 
 
 @app.post("/visa-applications")

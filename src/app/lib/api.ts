@@ -28,10 +28,7 @@ export type VisaApplication = {
   school_name?: string | null;
   accommodation_details?: string | null;
   extra_notes?: string | null;
-
-  // ✅ NEW FIELD (IMPORTANT)
   passport_file_path?: string | null;
-
   status: string;
 };
 
@@ -159,6 +156,34 @@ export async function getJobApplications(): Promise<JobApplication[]> {
     const text = await response.text();
     throw new Error(
       `Failed to fetch job applications: ${response.status} ${text}`
+    );
+  }
+
+  return response.json();
+}
+
+export async function updateJobApplicationStatus(
+  applicationId: number,
+  status: string
+): Promise<JobApplication> {
+  const token = localStorage.getItem("admin_token");
+
+  const response = await fetch(
+    `${API_BASE_URL}/job-applications/${applicationId}/status`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status }),
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(
+      `Failed to update job application status: ${response.status} ${text}`
     );
   }
 
