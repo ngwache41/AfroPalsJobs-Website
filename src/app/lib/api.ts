@@ -43,235 +43,151 @@ export type JobApplication = {
   status: string;
 };
 
-// ================= PUBLIC JOBS =================
+// ================= HELPER =================
 
-export async function getJobs(): Promise<Job[]> {
-  const response = await fetch(`${API_BASE_URL}/jobs`);
+async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(url, options);
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(`Failed to fetch jobs: ${response.status} ${text}`);
+    console.error("API ERROR:", url, response.status, text);
+    throw new Error(`${response.status}: ${text || "Request failed"}`);
   }
 
   return response.json();
+}
+
+function getAdminAuthHeaders() {
+  const token = localStorage.getItem("admin_token");
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+function getEmployerAuthHeaders() {
+  const token = localStorage.getItem("employer_token");
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+// ================= PUBLIC JOBS =================
+
+export async function getJobs(): Promise<Job[]> {
+  return safeFetch<Job[]>(`${API_BASE_URL}/jobs`);
 }
 
 // ================= ADMIN JOBS =================
 
 export async function getAdminJobs(): Promise<Job[]> {
-  const token = localStorage.getItem("admin_token");
-
-  const response = await fetch(`${API_BASE_URL}/admin/jobs`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  return safeFetch<Job[]>(`${API_BASE_URL}/admin/jobs`, {
+    headers: getAdminAuthHeaders(),
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Failed to fetch admin jobs: ${response.status} ${text}`);
-  }
-
-  return response.json();
 }
 
 export async function createJob(
   payload: Omit<Job, "id" | "status" | "created_by">
 ): Promise<Job> {
-  const token = localStorage.getItem("admin_token");
-
-  const response = await fetch(`${API_BASE_URL}/jobs`, {
+  return safeFetch<Job>(`${API_BASE_URL}/jobs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      ...getAdminAuthHeaders(),
     },
     body: JSON.stringify(payload),
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Failed to create job: ${response.status} ${text}`);
-  }
-
-  return response.json();
 }
 
 export async function updateJobStatus(
   jobId: number,
   status: string
 ): Promise<Job> {
-  const token = localStorage.getItem("admin_token");
-
-  const response = await fetch(
-    `${API_BASE_URL}/admin/jobs/${jobId}/status`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ status }),
-    }
-  );
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Failed to update job status: ${response.status} ${text}`
-    );
-  }
-
-  return response.json();
+  return safeFetch<Job>(`${API_BASE_URL}/admin/jobs/${jobId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAdminAuthHeaders(),
+    },
+    body: JSON.stringify({ status }),
+  });
 }
 
 // ================= JOB APPLICATIONS =================
 
 export async function createJobApplication(formData: FormData) {
-  const response = await fetch(`${API_BASE_URL}/job-applications`, {
+  return safeFetch(`${API_BASE_URL}/job-applications`, {
     method: "POST",
     body: formData,
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Failed to submit job application: ${response.status} ${text}`
-    );
-  }
-
-  return response.json();
 }
 
 export async function getJobApplications(): Promise<JobApplication[]> {
-  const token = localStorage.getItem("admin_token");
-
-  const response = await fetch(`${API_BASE_URL}/job-applications`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  return safeFetch<JobApplication[]>(`${API_BASE_URL}/job-applications`, {
+    headers: getAdminAuthHeaders(),
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Failed to fetch job applications: ${response.status} ${text}`
-    );
-  }
-
-  return response.json();
 }
 
 export async function updateJobApplicationStatus(
   applicationId: number,
   status: string
 ): Promise<JobApplication> {
-  const token = localStorage.getItem("admin_token");
-
-  const response = await fetch(
+  return safeFetch<JobApplication>(
     `${API_BASE_URL}/job-applications/${applicationId}/status`,
     {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        ...getAdminAuthHeaders(),
       },
       body: JSON.stringify({ status }),
     }
   );
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Failed to update job application status: ${response.status} ${text}`
-    );
-  }
-
-  return response.json();
 }
 
 // ================= VISA =================
 
 export async function createVisaApplication(formData: FormData) {
-  const response = await fetch(`${API_BASE_URL}/visa-applications`, {
+  return safeFetch(`${API_BASE_URL}/visa-applications`, {
     method: "POST",
     body: formData,
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Failed to submit visa application: ${response.status} ${text}`
-    );
-  }
-
-  return response.json();
 }
 
 export async function getVisaApplications(): Promise<VisaApplication[]> {
-  const token = localStorage.getItem("admin_token");
-
-  const response = await fetch(`${API_BASE_URL}/visa-applications`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  return safeFetch<VisaApplication[]>(`${API_BASE_URL}/visa-applications`, {
+    headers: getAdminAuthHeaders(),
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Failed to fetch visa applications: ${response.status} ${text}`
-    );
-  }
-
-  return response.json();
 }
 
 export async function updateVisaApplicationStatus(
   applicationId: number,
   status: string
 ): Promise<VisaApplication> {
-  const token = localStorage.getItem("admin_token");
-
-  const response = await fetch(
+  return safeFetch<VisaApplication>(
     `${API_BASE_URL}/visa-applications/${applicationId}/status`,
     {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        ...getAdminAuthHeaders(),
       },
       body: JSON.stringify({ status }),
     }
   );
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Failed to update visa application status: ${response.status} ${text}`
-    );
-  }
-
-  return response.json();
 }
 
 // ================= ADMIN AUTH =================
 
 export async function adminLogin(username: string, password: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/login`, {
+  return safeFetch(`${API_BASE_URL}/admin/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ username, password }),
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Admin login failed: ${response.status} ${text}`);
-  }
-
-  return response.json();
 }
 
 export function saveAdminToken(token: string) {
@@ -289,22 +205,13 @@ export function isAdminLoggedIn(): boolean {
 // ================= EMPLOYER AUTH =================
 
 export async function employerLogin(username: string, password: string) {
-  const response = await fetch(`${API_BASE_URL}/employer/login`, {
+  return safeFetch(`${API_BASE_URL}/employer/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ username, password }),
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Employer login failed: ${response.status} ${text}`
-    );
-  }
-
-  return response.json();
 }
 
 export function saveEmployerToken(token: string) {
@@ -320,22 +227,9 @@ export function isEmployerLoggedIn(): boolean {
 }
 
 export async function getEmployerMe() {
-  const token = localStorage.getItem("employer_token");
-
-  const response = await fetch(`${API_BASE_URL}/employer/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  return safeFetch(`${API_BASE_URL}/employer/me`, {
+    headers: getEmployerAuthHeaders(),
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Employer auth check failed: ${response.status} ${text}`
-    );
-  }
-
-  return response.json();
 }
 
 // ================= EMPLOYER JOBS =================
@@ -343,23 +237,12 @@ export async function getEmployerMe() {
 export async function createEmployerJob(
   payload: Omit<Job, "id" | "status" | "created_by">
 ): Promise<Job> {
-  const token = localStorage.getItem("employer_token");
-
-  const response = await fetch(`${API_BASE_URL}/employer/jobs`, {
+  return safeFetch<Job>(`${API_BASE_URL}/employer/jobs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      ...getEmployerAuthHeaders(),
     },
     body: JSON.stringify(payload),
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Failed to create employer job: ${response.status} ${text}`
-    );
-  }
-
-  return response.json();
 }
