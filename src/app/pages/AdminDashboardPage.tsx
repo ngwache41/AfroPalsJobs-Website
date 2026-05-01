@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   clearAdminToken,
@@ -6,6 +6,7 @@ import {
   getJobApplications,
   getVisaApplications,
   isAdminLoggedIn,
+  updateJobApplicationStatus,
   updateJobStatus,
   updateVisaApplicationStatus,
   Job,
@@ -13,6 +14,9 @@ import {
   VisaApplication,
 } from "../lib/api";
 import { statusBadge, typography, ui } from "../theme";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 const actionButtonStyle: React.CSSProperties = {
   ...ui.secondaryButton,
@@ -36,8 +40,24 @@ const downloadButtonStyle: React.CSSProperties = {
   fontSize: "14px",
 };
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "14px 16px",
+  borderRadius: "14px",
+  border: "1px solid #d1d5db",
+  fontSize: "15px",
+  outline: "none",
+  background: "#ffffff",
+};
+
+const selectStyle: React.CSSProperties = {
+  padding: "12px 14px",
+  borderRadius: "14px",
+  border: "1px solid #d1d5db",
+  fontSize: "14px",
+  background: "#ffffff",
+  minWidth: "170px",
+};
 
 function buildFileUrl(path?: string | null) {
   if (!path) return "";
@@ -59,15 +79,32 @@ function buildDownloadUrl(path?: string | null) {
     : `${fileUrl}?download=true`;
 }
 
+function matchesText(value: string | undefined | null, search: string) {
+  return (value || "").toLowerCase().includes(search.toLowerCase());
+}
+
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
+
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
   const [visaApplications, setVisaApplications] = useState<VisaApplication[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [updatingVisaId, setUpdatingVisaId] = useState<number | null>(null);
+
+  const [jobSearch, setJobSearch] = useState("");
+  const [jobStatusFilter, setJobStatusFilter] = useState("all");
+
+  const [jobApplicationSearch, setJobApplicationSearch] = useState("");
+  const [jobApplicationStatusFilter, setJobApplicationStatusFilter] = useState("all");
+
+  const [visaSearch, setVisaSearch] = useState("");
+  const [visaStatusFilter, setVisaStatusFilter] = useState("all");
+
   const [updatingJobId, setUpdatingJobId] = useState<number | null>(null);
+  const [updatingJobApplicationId, setUpdatingJobApplicationId] = useState<number | null>(null);
+  const [updatingVisaId, setUpdatingVisaId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isAdminLoggedIn()) {
@@ -100,17 +137,14 @@ export default function AdminDashboardPage() {
     }
   }
 
-  async function handleVisaStatusUpdate(applicationId: number, status: string) {
-    try {
-      setUpdatingVisaId(applicationId);
-      await updateVisaApplicationStatus(applicationId, status);
-      await loadDashboardData();
-    } catch (error) {
-      console.error(error);
-      setErrorMessage("Failed to update visa application status.");
-    } finally {
-      setUpdatingVisaId(null);
-    }
+  function handleLogout() {
+    clearAdminToken();
+    navigate("/admin-login");
+  }
+
+  function getJobTitle(jobId: number) {
+    const job = jobs.find((item) => item.id === jobId);
+    return job ? job.title : `Job #${jobId}`;
   }
 
   async function handleJobStatusUpdate(jobId: number, status: string) {
@@ -126,15 +160,93 @@ export default function AdminDashboardPage() {
     }
   }
 
-  function handleLogout() {
-    clearAdminToken();
-    navigate("/admin-login");
+  async function handleJobApplicationStatusUpdate(applicationId: number, status: string) {
+    try {
+      setUpdatingJobApplicationId(applicationId);
+      await updateJobApplicationStatus(applicationId, status);
+      await loadDashboardData();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Failed to update job application status.");
+    } finally {
+      setUpdatingJobApplicationId(null);
+    }
   }
 
-  function getJobTitle(jobId: number) {
-    const job = jobs.find((item) => item.id === jobId);
-    return job ? job.title : `Job #${jobId}`;
+  async function handleVisaStatusUpdate(applicationId: number, status: string) {
+    try {
+      setUpdatingVisaId(applicationId);
+      await updateVisaApplicationStatus(applicationId, status);
+      await loadDashboardData();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Failed to update visa application status.");
+    } finally {
+      setUpdatingVisaId(null);
+    }
   }
+
+  const filteredJobs = useMemo(() => {
+    return jobs.filter((job) => {
+      const matchesStatus =
+        jobStatusFilter === "all" || job.status === jobStatusFilter;
+
+      const matchesSearch =
+        matchesText(job.title, jobSearch) ||
+        matchesText(job.company, jobSearch) ||
+        matchesText(job.location, jobSearch) ||
+        matchesText(job.description, jobSearch) ||
+        matchesText(job.created_by, jobSearch);
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [jobs, jobSearch, jobStatusFilter]);
+
+  const filteredJobApplications = useMemo(() => {
+    return jobApplications.filter((application) => {
+      const matchesStatus =
+        jobApplicationStatusFilter === "all" ||
+        application.status === jobApplicationStatusFilter;
+
+      const jobTitle = getJobTitle(application.job_id);
+
+      const matchesSearch =
+        matchesText(application.full_name, jobApplicationSearch) ||
+        matchesText(application.email, jobApplicationSearch) ||
+        matchesText(application.phone, jobApplicationSearch) ||
+        matchesText(application.cover_letter, jobApplicationSearch) ||
+        matchesText(jobTitle, jobApplicationSearch);
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [jobApplications, jobApplicationSearch, jobApplicationStatusFilter, jobs]);
+
+  const filteredVisaApplications = useMemo(() => {
+    return visaApplications.filter((application) => {
+      const matchesStatus =
+        visaStatusFilter === "all" || application.status === visaStatusFilter;
+
+      const matchesSearch =
+        matchesText(application.full_name, visaSearch) ||
+        matchesText(application.email, visaSearch) ||
+        matchesText(application.phone, visaSearch) ||
+        matchesText(application.nationality, visaSearch) ||
+        matchesText(application.passport_number, visaSearch) ||
+        matchesText(application.visa_type, visaSearch) ||
+        matchesText(application.destination_city, visaSearch) ||
+        matchesText(application.purpose_of_visit, visaSearch);
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [visaApplications, visaSearch, visaStatusFilter]);
+
+  const pendingJobs = jobs.filter((job) => job.status === "pending").length;
+  const pendingJobApplications = jobApplications.filter(
+    (application) => application.status === "pending"
+  ).length;
+  const pendingVisaApplications = visaApplications.filter(
+    (application) => application.status === "pending"
+  ).length;
 
   if (!isAdminLoggedIn()) {
     return (
@@ -174,7 +286,13 @@ export default function AdminDashboardPage() {
           }}
         >
           <div>
-            <h1 style={{ ...typography.pageTitle, margin: "0 0 12px 0", color: "#0f172a" }}>
+            <h1
+              style={{
+                ...typography.pageTitle,
+                margin: "0 0 12px 0",
+                color: "#0f172a",
+              }}
+            >
               Admin Dashboard
             </h1>
             <p
@@ -184,7 +302,7 @@ export default function AdminDashboardPage() {
                 maxWidth: "860px",
               }}
             >
-              Review jobs, job applications, and visa applications from one organized control panel.
+              Search, filter, review, approve, and manage jobs, job applications, and visa applications.
             </p>
           </div>
 
@@ -221,8 +339,11 @@ export default function AdminDashboardPage() {
           <div style={{ ...typography.body, fontWeight: 600, marginBottom: "12px" }}>
             Total Jobs
           </div>
-          <div style={{ fontSize: "48px", fontWeight: 800, color: "#111827" }}>
+          <div style={{ fontSize: "44px", fontWeight: 800, color: "#111827" }}>
             {loading ? "..." : jobs.length}
+          </div>
+          <div style={{ ...typography.body, marginTop: "6px" }}>
+            Pending: {loading ? "..." : pendingJobs}
           </div>
         </div>
 
@@ -230,8 +351,11 @@ export default function AdminDashboardPage() {
           <div style={{ ...typography.body, fontWeight: 600, marginBottom: "12px" }}>
             Job Applications
           </div>
-          <div style={{ fontSize: "48px", fontWeight: 800, color: "#111827" }}>
+          <div style={{ fontSize: "44px", fontWeight: 800, color: "#111827" }}>
             {loading ? "..." : jobApplications.length}
+          </div>
+          <div style={{ ...typography.body, marginTop: "6px" }}>
+            Pending: {loading ? "..." : pendingJobApplications}
           </div>
         </div>
 
@@ -239,8 +363,11 @@ export default function AdminDashboardPage() {
           <div style={{ ...typography.body, fontWeight: 600, marginBottom: "12px" }}>
             Visa Applications
           </div>
-          <div style={{ fontSize: "48px", fontWeight: 800, color: "#111827" }}>
+          <div style={{ fontSize: "44px", fontWeight: 800, color: "#111827" }}>
             {loading ? "..." : visaApplications.length}
+          </div>
+          <div style={{ ...typography.body, marginTop: "6px" }}>
+            Pending: {loading ? "..." : pendingVisaApplications}
           </div>
         </div>
       </section>
@@ -251,16 +378,43 @@ export default function AdminDashboardPage() {
             Jobs
           </h2>
           <p style={{ ...typography.body, marginTop: 0 }}>
-            Review all submitted jobs and approve or reject employer postings.
+            Search and manage all admin-created and employer-submitted jobs.
           </p>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(220px, 1fr) auto",
+              gap: "12px",
+              marginBottom: "18px",
+            }}
+          >
+            <input
+              value={jobSearch}
+              onChange={(event) => setJobSearch(event.target.value)}
+              placeholder="Search jobs by title, company, location..."
+              style={inputStyle}
+            />
+
+            <select
+              value={jobStatusFilter}
+              onChange={(event) => setJobStatusFilter(event.target.value)}
+              style={selectStyle}
+            >
+              <option value="all">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
 
           {loading ? (
             <p style={typography.body}>Loading jobs...</p>
-          ) : jobs.length === 0 ? (
-            <div style={ui.softCard}>No jobs found.</div>
+          ) : filteredJobs.length === 0 ? (
+            <div style={ui.softCard}>No jobs match your search/filter.</div>
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
-              {jobs.map((job) => (
+              {filteredJobs.map((job) => (
                 <div key={job.id} style={{ ...ui.softCard, padding: "20px" }}>
                   <div
                     style={{
@@ -297,39 +451,21 @@ export default function AdminDashboardPage() {
                   </p>
 
                   <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                    <button
-                      style={{
-                        ...actionButtonStyle,
-                        background: "#dcfce7",
-                        border: "1px solid #86efac",
-                        color: "#166534",
-                      }}
-                      onClick={() => handleJobStatusUpdate(job.id, "approved")}
+                    <select
+                      value={job.status}
+                      onChange={(event) =>
+                        handleJobStatusUpdate(job.id, event.target.value)
+                      }
                       disabled={updatingJobId === job.id}
+                      style={selectStyle}
                     >
-                      {updatingJobId === job.id ? "Updating..." : "Approve"}
-                    </button>
-
-                    <button
-                      style={{
-                        ...actionButtonStyle,
-                        background: "#fee2e2",
-                        border: "1px solid #fca5a5",
-                        color: "#991b1b",
-                      }}
-                      onClick={() => handleJobStatusUpdate(job.id, "rejected")}
-                      disabled={updatingJobId === job.id}
-                    >
-                      {updatingJobId === job.id ? "Updating..." : "Reject"}
-                    </button>
-
-                    <button
-                      style={actionButtonStyle}
-                      onClick={() => handleJobStatusUpdate(job.id, "pending")}
-                      disabled={updatingJobId === job.id}
-                    >
-                      {updatingJobId === job.id ? "Updating..." : "Mark Pending"}
-                    </button>
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                    {updatingJobId === job.id && (
+                      <span style={typography.body}>Updating...</span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -342,16 +478,44 @@ export default function AdminDashboardPage() {
             Job Applications
           </h2>
           <p style={{ ...typography.body, marginTop: 0 }}>
-            Review candidate applications and uploaded CV files.
+            Search candidates, open CVs, download files, and update application status.
           </p>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(220px, 1fr) auto",
+              gap: "12px",
+              marginBottom: "18px",
+            }}
+          >
+            <input
+              value={jobApplicationSearch}
+              onChange={(event) => setJobApplicationSearch(event.target.value)}
+              placeholder="Search candidates by name, email, phone, job..."
+              style={inputStyle}
+            />
+
+            <select
+              value={jobApplicationStatusFilter}
+              onChange={(event) => setJobApplicationStatusFilter(event.target.value)}
+              style={selectStyle}
+            >
+              <option value="all">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="reviewed">Reviewed</option>
+              <option value="accepted">Accepted</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
 
           {loading ? (
             <p style={typography.body}>Loading job applications...</p>
-          ) : jobApplications.length === 0 ? (
-            <div style={ui.softCard}>No job applications found.</div>
+          ) : filteredJobApplications.length === 0 ? (
+            <div style={ui.softCard}>No job applications match your search/filter.</div>
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
-              {jobApplications.map((application) => (
+              {filteredJobApplications.map((application) => (
                 <div key={application.id} style={{ ...ui.softCard, padding: "20px" }}>
                   <div
                     style={{
@@ -393,27 +557,57 @@ export default function AdminDashboardPage() {
                     {application.cover_letter || "No cover letter provided."}
                   </div>
 
-                  {application.cv_file_path && (
-                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                      <a
-                        href={buildFileUrl(application.cv_file_path)}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={fileButtonStyle}
-                      >
-                        Open CV
-                      </a>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                    }}
+                  >
+                    {application.cv_file_path && (
+                      <>
+                        <a
+                          href={buildFileUrl(application.cv_file_path)}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={fileButtonStyle}
+                        >
+                          Open CV
+                        </a>
 
-                      <a
-                        href={buildDownloadUrl(application.cv_file_path)}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={downloadButtonStyle}
-                      >
-                        Download CV
-                      </a>
-                    </div>
-                  )}
+                        <a
+                          href={buildDownloadUrl(application.cv_file_path)}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={downloadButtonStyle}
+                        >
+                          Download CV
+                        </a>
+                      </>
+                    )}
+
+                    <select
+                      value={application.status}
+                      onChange={(event) =>
+                        handleJobApplicationStatusUpdate(
+                          application.id,
+                          event.target.value
+                        )
+                      }
+                      disabled={updatingJobApplicationId === application.id}
+                      style={selectStyle}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="reviewed">Reviewed</option>
+                      <option value="accepted">Accepted</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+
+                    {updatingJobApplicationId === application.id && (
+                      <span style={typography.body}>Updating...</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -425,16 +619,44 @@ export default function AdminDashboardPage() {
             Visa Applications
           </h2>
           <p style={{ ...typography.body, marginTop: 0 }}>
-            Review applications, uploaded passport files, and update their status.
+            Search visa applicants, open documents, download files, and update status.
           </p>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(220px, 1fr) auto",
+              gap: "12px",
+              marginBottom: "18px",
+            }}
+          >
+            <input
+              value={visaSearch}
+              onChange={(event) => setVisaSearch(event.target.value)}
+              placeholder="Search visa applications by name, email, nationality..."
+              style={inputStyle}
+            />
+
+            <select
+              value={visaStatusFilter}
+              onChange={(event) => setVisaStatusFilter(event.target.value)}
+              style={selectStyle}
+            >
+              <option value="all">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
 
           {loading ? (
             <p style={typography.body}>Loading visa applications...</p>
-          ) : visaApplications.length === 0 ? (
-            <div style={ui.softCard}>No visa applications found.</div>
+          ) : filteredVisaApplications.length === 0 ? (
+            <div style={ui.softCard}>No visa applications match your search/filter.</div>
           ) : (
             <div style={{ display: "grid", gap: "16px" }}>
-              {visaApplications.map((application) => (
+              {filteredVisaApplications.map((application) => (
                 <div key={application.id} style={{ ...ui.softCard, padding: "20px" }}>
                   <div
                     style={{
@@ -514,77 +736,55 @@ export default function AdminDashboardPage() {
                       </div>
                     )}
 
-                    {application.passport_file_path && (
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "10px",
-                          flexWrap: "wrap",
-                          marginTop: "8px",
-                        }}
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {application.passport_file_path && (
+                        <>
+                          <a
+                            href={buildFileUrl(application.passport_file_path)}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={fileButtonStyle}
+                          >
+                            Open Passport File
+                          </a>
+
+                          <a
+                            href={buildDownloadUrl(application.passport_file_path)}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={downloadButtonStyle}
+                          >
+                            Download Passport File
+                          </a>
+                        </>
+                      )}
+
+                      <select
+                        value={application.status}
+                        onChange={(event) =>
+                          handleVisaStatusUpdate(application.id, event.target.value)
+                        }
+                        disabled={updatingVisaId === application.id}
+                        style={selectStyle}
                       >
-                        <a
-                          href={buildFileUrl(application.passport_file_path)}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={fileButtonStyle}
-                        >
-                          Open Passport File
-                        </a>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
 
-                        <a
-                          href={buildDownloadUrl(application.passport_file_path)}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={downloadButtonStyle}
-                        >
-                          Download Passport File
-                        </a>
-                      </div>
-                    )}
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      flexWrap: "wrap",
-                      marginTop: "18px",
-                    }}
-                  >
-                    <button
-                      style={actionButtonStyle}
-                      onClick={() => handleVisaStatusUpdate(application.id, "pending")}
-                      disabled={updatingVisaId === application.id}
-                    >
-                      {updatingVisaId === application.id ? "Updating..." : "Mark Pending"}
-                    </button>
-
-                    <button
-                      style={{
-                        ...actionButtonStyle,
-                        background: "#dcfce7",
-                        border: "1px solid #86efac",
-                        color: "#166534",
-                      }}
-                      onClick={() => handleVisaStatusUpdate(application.id, "approved")}
-                      disabled={updatingVisaId === application.id}
-                    >
-                      {updatingVisaId === application.id ? "Updating..." : "Approve"}
-                    </button>
-
-                    <button
-                      style={{
-                        ...actionButtonStyle,
-                        background: "#fee2e2",
-                        border: "1px solid #fca5a5",
-                        color: "#991b1b",
-                      }}
-                      onClick={() => handleVisaStatusUpdate(application.id, "rejected")}
-                      disabled={updatingVisaId === application.id}
-                    >
-                      {updatingVisaId === application.id ? "Updating..." : "Reject"}
-                    </button>
+                      {updatingVisaId === application.id && (
+                        <span style={typography.body}>Updating...</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
